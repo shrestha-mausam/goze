@@ -1,0 +1,53 @@
+---
+description: Guidelines for developing UI for the client frontend
+globs: 
+---
+# UI Guidelines
+
+## Component Usage
+- All UI for the client should use PrimeReact components exclusively
+- Custom components should extend PrimeReact base components
+- Component props should follow consistent naming conventions
+- All components should be accessible and keyboard navigable
+
+## Theming
+- Follow the defined color palette for all UI elements
+- All components must support both dark and light modes
+- Use theme variables rather than hardcoded color values
+- Use spacing and typography tokens from the theme system
+
+## Layout & Responsiveness
+- All pages must be responsive across mobile, tablet, and desktop breakpoints
+- Use the grid system consistently for layouts
+- Maintain appropriate content density for target devices
+- Follow established navigation patterns for consistency
+
+## Accessibility
+- All UI must comply with WCAG 2.1 AA standards
+- Test all components with screen readers
+- Maintain appropriate color contrast ratios
+- Provide text alternatives for non-text content
+
+## Forms & Validation
+- Use consistent error messaging patterns
+- Implement inline validation where appropriate
+- Group related form fields logically
+- Provide clear success/error states for submissions
+
+## Performance
+- Lazy load components not visible in the initial viewport
+- Optimize image delivery based on viewport size
+- Implement appropriate loading states for async operations
+- Monitor and maintain Lighthouse performance scores
+
+## Documentation
+- Document component usage patterns
+- Create usage examples for complex components
+- Maintain a living style guide
+- Include accessibility notes for each component
+
+# Enforcement
+- UI reviews should validate compliance with these guidelines
+- Automated tests should verify theme compatibility
+- Accessibility testing should be part of the CI pipeline
+- Design system documentation should be kept updated

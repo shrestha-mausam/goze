@@ -1,0 +1,39 @@
+# Local development configuration
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/goze?currentSchema=goze
+    username: postgres
+    password:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_schema: goze
+  
+  # CORS configuration for local development
+  web:
+    cors:
+      allowed-origins: "http://localhost:3000"
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+      allowed-headers: Authorization,Content-Type,X-Requested-With
+      exposed-headers: Authorization
+      allow-credentials: true
+      max-age: 3600
+
+# JWT Configuration
+jwt:
+  # Fixed key for local development only
+  secret: Yd+QZCkBnmMJnXMKsVl8dRZZhRsGU+8CgEw+rGOax8Ij+yCqX+EGfQwQPQY/aBnQnJl+Fy+YdgRHhCbL+LFCNQ==
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.mshrestha.goze: DEBUG
+    org.hibernate: ERROR
+    org.hibernate.SQL: OFF
+    org.hibernate.type.descriptor.sql: OFF
+    org.springframework.orm.jpa: ERROR 

@@ -1,0 +1,6 @@
+server/target/
+server/src/main/resources/application-local.yml.template
+client/node_modules/
+client/.next/
+client/.env.local
+.vscode/settings.json

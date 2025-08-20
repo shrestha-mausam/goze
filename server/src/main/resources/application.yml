@@ -1,0 +1,71 @@
+# Common configuration across all profiles
+
+# server configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
+
+# Spring configuration shared across all environments
+spring:
+  application:
+    name: goze
+  
+  # CORS configuration (default, overridden in profiles)
+  web:
+    cors:
+      enabled: true
+      # Other common CORS settings will be defined in profiles
+    resources:
+      add-mappings: false
+  
+  # JPA/Hibernate configuration
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  # Jackson JSON configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
+    default-property-inclusion: non_null
+  
+  # Servlet configuration
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  
+  # MVC configuration
+  mvc:
+    throw-exception-if-no-handler-found: true
+
+# JWT Configuration (common settings)
+jwt:
+  algorithm: HS512
+  expiration: 3600  # 1 hour in seconds
+  refresh-expiration: 86400  # 24 hours in seconds
+
+# Logging configuration (common)
+logging:
+  level:
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized

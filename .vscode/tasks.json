@@ -1,0 +1,33 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Goze Spring Boot Backend",
+            "type": "shell",
+            "command": "cd server && mvn clean package -DskipTests && java -jar -Dspring.profiles.active=${input:profile} target/*.jar",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "profile",
+            "type": "pickString",
+            "description": "Select Spring Boot profile",
+            "options": [
+                "local",
+                "dev",
+                "prod"
+            ],
+            "default": "local"
+        }
+    ]
+}

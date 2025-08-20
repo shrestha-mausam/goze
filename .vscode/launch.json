@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug Spring Boot (Local)",
+            "request": "launch",
+            "mainClass": "com.mshrestha.goze.GozeApplication",
+            "projectName": "goze",
+            "cwd": "${workspaceFolder}/server",
+            "args": "--spring.profiles.active=local",
+            "env": {
+                "SPRING_OUTPUT_ANSI_ENABLED": "always"
+            },
+            "vmArgs": [
+                "-Dspring.output.ansi.enabled=always",
+                "-Dfile.encoding=UTF-8"
+            ]
+        },
+        {
+            "name": "Next.js: debug server-side",
+            "cwd": "${workspaceFolder}/client",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "npm run dev",
+            "skipFiles": ["<node_internals>/**"]
+        },
+        {
+            "name": "Next.js: debug client-side",
+            "cwd": "${workspaceFolder}/client",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/client"
+        },
+        {
+            "name": "Next.js: debug full stack",    
+            "cwd": "${workspaceFolder}/client",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "npm run dev",
+            "serverReadyAction": {
+                "pattern": "- Local:.+(https?://.+)",
+                "uriFormat": "%s",
+                "action": "debugWithChrome"
+            }
+        }
+    ]
+}

@@ -1,0 +1,188 @@
+---
+description: Guidance around developing spring boot backend infrastructure and development
+globs: 
+alwaysApply: false
+---
+
+# JWT token infrastructure design
+
+# Api Development
+
+
+# Exception Handling
+- Controller should not be doing exception handling when possible, rather they should be throwing exceptions so that the GlobalExceptionHandler can catch it
+- Custom exceptions should be defined in utils/exception
+
+# Spring Boot Backend Development Guidelines
+
+## Architecture and Structure
+
+1. **Package Organization**
+   - Use feature-based packaging: `com.mshrestha.goze.[feature]`
+   - Common packages: `controller`, `service`, `repository`, `model`, `dto`, `utils`
+   - Group related functionality in domain-specific subpackages
+
+2. **Layer Separation**
+   - Controllers: Handle HTTP requests/responses only
+   - Services: Contain business logic
+   - Repositories: Data access only
+   - DTOs: Data transfer between layers
+   - Models: Domain entities
+
+3. **Naming Conventions**
+   - Controllers: `[Feature]Controller`
+   - Services: `[Feature]Service`
+   - Repositories: `[Entity]Repository`
+   - DTOs: `[Purpose][Entity]Dto` (e.g., `CreateUserDto`)
+   - Exception classes: `[Problem]Exception`
+
+## API Design
+
+1. **REST Principles**
+   - Use appropriate HTTP methods (GET, POST, PUT, DELETE)
+   - Return appropriate status codes
+   - Use plural nouns for resource collections (`/api/v1/users`)
+   - Use sub-resources for relationships (`/api/v1/users/{id}/posts`)
+
+2. **Request/Response Format**
+   - Use `ApiResponse<T>` wrapper for all responses
+   - Include pagination for collection endpoints
+   - Use DTOs for request/response, never expose entities directly
+
+3. **Versioning**
+   - Include version in URL path (`/api/v1/...`)
+   - Maintain backward compatibility within versions
+
+4. **Documentation**
+   - Document all public APIs with Javadoc
+   - Include purpose, parameters, return values, and exceptions
+   - Add example requests/responses where helpful
+
+## Security
+
+1. **Authentication**
+   - JWT-based authentication with short-lived access tokens
+   - Refresh token mechanism for extended sessions
+   - Store tokens securely (no localStorage in frontend)
+
+2. **Authorization**
+   - Role-based access control
+   - Method-level security with `@PreAuthorize`
+   - Validate permissions in service layer
+
+3. **Password Handling**
+   - Always use BCrypt for password hashing
+   - Implement account lockout after failed attempts
+   - Never log or expose passwords
+
+4. **JWT Configuration**
+   - Use strong signing keys (minimum 256 bits)
+   - Short expiration for access tokens (1 hour)
+   - Store secrets in environment variables, not in code
+
+## Exception Handling
+
+1. **Global Exception Handling**
+   - Use `@ControllerAdvice` for centralized exception handling
+   - Map exceptions to appropriate HTTP status codes
+   - Return consistent error responses
+
+2. **Custom Exceptions**
+   - Create domain-specific exceptions
+   - Include meaningful error messages
+   - Add error codes for frontend handling
+
+3. **Validation**
+   - Use Bean Validation (`@Valid`, `@NotNull`, etc.)
+   - Validate at controller level
+   - Return detailed validation errors
+
+## Database Access
+
+1. **Repository Pattern**
+   - Use Spring Data JPA repositories
+   - Create custom queries with method names or `@Query`
+   - Avoid N+1 query problems with proper fetching
+
+2. **Transactions**
+   - Use `@Transactional` at service level
+   - Set appropriate isolation levels
+   - Handle transaction boundaries carefully
+
+3. **Auditing**
+   - Track creation/modification timestamps
+   - Record user who made changes
+   - Use JPA Auditing with `@CreatedBy`, `@LastModifiedBy`
+
+## Testing
+
+1. **Unit Testing**
+   - Test each service method in isolation
+   - Mock dependencies with Mockito
+   - Focus on business logic
+
+2. **Integration Testing**
+   - Test API endpoints with `@SpringBootTest`
+   - Use test containers for database tests
+   - Verify complete request-response cycle
+
+3. **Security Testing**
+   - Test authentication/authorization flows
+   - Verify token validation
+   - Check for common security vulnerabilities
+
+4. **Documentation**
+   - Document each test with what its does, what functionality its trying to test, and why should we test it
+
+## Performance and Scalability
+
+1. **Caching**
+   - Use Spring Cache abstraction
+   - Cache frequently accessed, rarely changing data
+   - Set appropriate TTL values
+
+2. **Pagination**
+   - Always paginate collection endpoints
+   - Use page, size, and sort parameters
+   - Return total count with paginated results
+
+3. **Async Processing**
+   - Use `@Async` for long-running operations
+   - Implement proper error handling for async tasks
+   - Consider message queues for heavy processing
+
+## Logging and Monitoring
+
+1. **Logging**
+   - Use SLF4J with appropriate log levels
+   - Include request IDs for traceability
+   - Log security events and errors
+
+2. **Metrics**
+   - Use Spring Actuator for health checks
+   - Monitor performance metrics
+   - Track authentication success/failure rates
+
+3. **Auditing**
+   - Log security-sensitive operations
+   - Track user actions for compliance
+   - Implement non-repudiation where required
+
+## Code Quality
+
+1. **Clean Code**
+   - Follow SOLID principles
+   - Keep methods small and focused
+   - Use meaningful variable and method names
+
+2. **Documentation**
+   - Document public APIs and classes
+   - Explain complex algorithms
+   - Update documentation when code changes
+
+3. **Code Reviews**
+   - Review for security vulnerabilities
+   - Check for performance issues
+   - Ensure adherence to these guidelines
+
+
