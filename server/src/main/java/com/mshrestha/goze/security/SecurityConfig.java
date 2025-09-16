@@ -35,9 +35,6 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
-
     @Value("${spring.web.cors.allowed-origins}")
     private String[] allowedOrigins;
     
@@ -68,14 +65,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/login").permitAll()
-                .requestMatchers("/api/v1/auth/register").permitAll()
-                .requestMatchers("/api/v1/auth/validate").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }

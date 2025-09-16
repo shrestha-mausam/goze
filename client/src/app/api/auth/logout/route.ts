@@ -1,4 +1,4 @@
-import { ErrRespDataToFrontend, SuccessRespToFrontend } from '@/types.server';
+import { ErrRespDataToFrontend, SuccessRespToFrontend } from '@/lib/types';
 import { StatusCodes } from 'http-status-codes';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
@@ -14,31 +14,31 @@ import { NextResponse } from 'next/server';
  * No backend call is needed since we're just removing client-side cookies
  */
 export async function POST() {
-  try {
-    // Get the cookies store
-    const cookieStore = cookies();
-    
-    // Delete the authentication cookies
-    (await cookieStore).delete('accessToken');
-    (await cookieStore).delete('refreshToken');
-    
-    // Create success response
-    const successResponse: SuccessRespToFrontend = {
-      success: true
-    };
-    
-    // Return success response
-    return NextResponse.json(successResponse, {
-      status: StatusCodes.OK
-    });
-  } catch (error) {
-    console.error('Logout error:', error);
-    const errRespDataToClient: ErrRespDataToFrontend = {
-      status: StatusCodes.INTERNAL_SERVER_ERROR,
-      description: 'An error occurred during logout',
+    try {
+        // Get the cookies store
+        const cookieStore = cookies();
+
+        // Delete the authentication cookies
+        (await cookieStore).delete('accessToken');
+        (await cookieStore).delete('refreshToken');
+
+        // Create success response
+        const successResponse: SuccessRespToFrontend = {
+            success: true
+        };
+
+        // Return success response
+        return NextResponse.json(successResponse, {
+            status: StatusCodes.OK
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+        const errRespDataToClient: ErrRespDataToFrontend = {
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            description: 'An error occurred during logout',
+        }
+        return NextResponse.json(errRespDataToClient, {
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+        });
     }
-    return NextResponse.json(errRespDataToClient, {
-      status: StatusCodes.INTERNAL_SERVER_ERROR,
-    });
-  }
 }

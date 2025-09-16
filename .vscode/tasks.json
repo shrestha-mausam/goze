@@ -15,6 +15,18 @@
                 "clear": true
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Run Goze Next Client Server",
+            "type": "shell",
+            "command": "cd client && rm -rf node_modules package-lock.json && npm install && npm run build && npm run dev",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
         }
     ],
     "inputs": [

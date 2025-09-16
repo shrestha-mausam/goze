@@ -8,6 +8,9 @@ import com.mshrestha.goze.security.JwtUserDetailsService;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -214,7 +217,7 @@ public class AuthService {
      * @param token The JWT token to validate
      * @return true if token is valid, false otherwise
      */
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token) throws InvalidTokenException {
         try {
             jwtTokenUtil.validateTokenSignatureAndExpiration(token);
             // extract the username and 
@@ -222,8 +225,24 @@ public class AuthService {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             
             return jwtTokenUtil.validateToken(token, userDetails);
+        } catch (SecurityException e) {
+            logger.error("Invalid JWT signature", e);
+            throw new InvalidTokenException("JWT signature validation failed");
+        } catch (MalformedJwtException e) {
+            logger.error("Invalid JWT token", e);
+            throw new InvalidTokenException("JWT token is malformed");
+        } catch (ExpiredJwtException e) {
+            logger.error("JWT token has expired", e);
+            throw new InvalidTokenException("JWT token has expired");
+        } catch (UnsupportedJwtException e) {
+            logger.error("Unsupported JWT token", e);
+            throw new InvalidTokenException("JWT token format is not supported");
+        } catch (IllegalArgumentException e) {
+            logger.error("JWT claims string is empty", e);
+            throw new InvalidTokenException("JWT token is invalid");
         } catch (Exception e) {
-            return false;
+            logger.error("JWT validation error", e);
+            throw new InvalidTokenException("Error processing JWT token");
         }
     }
     

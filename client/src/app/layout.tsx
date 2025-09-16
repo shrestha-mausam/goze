@@ -10,24 +10,22 @@ import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'Goze',
-  description: 'Your Personal Finance Manager',
+    title: 'Goze',
+    description: 'Your Personal Finance Manager',
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body>
-        <ThemeProvider>
-          <PrimeReactProvider>
-            {children}
-          </PrimeReactProvider>
-        </ThemeProvider>
-      </body>
-    </html>
-  );
-} 
+    return (
+        <html lang="en">
+            <body>
+                <ThemeProvider>
+                    <PrimeReactProvider>{children}</PrimeReactProvider>
+                </ThemeProvider>
+            </body>
+        </html>
+    );
+}

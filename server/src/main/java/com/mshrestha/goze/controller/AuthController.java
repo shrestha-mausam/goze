@@ -1,6 +1,7 @@
 package com.mshrestha.goze.controller;
 
 import com.mshrestha.goze.service.AuthService;
+import com.mshrestha.goze.utils.GozeHttpUtility;
 import com.mshrestha.goze.utils.exception.DuplicateResourceException;
 import com.mshrestha.goze.utils.exception.InvalidTokenException;
 
@@ -20,7 +21,6 @@ import com.mshrestha.goze.dto.auth.JwtTokenResponse;
 import com.mshrestha.goze.dto.auth.LoginRequest;
 import com.mshrestha.goze.dto.auth.RegisterRequest;
 import com.mshrestha.goze.dto.auth.RefreshTokenRequest;
-import com.mshrestha.goze.dto.auth.ValidateTokenRequest;
 import com.mshrestha.goze.dto.auth.ValidateTokenResponse;
 
 /**
@@ -53,14 +53,36 @@ public class AuthController {
             @RequestBody LoginRequest loginRequest,
             HttpServletRequest request) throws Exception {
         
+        logger.info("Received login request for user: {}", loginRequest.getUsername());
+        
         // Check rate limit
         authService.checkRateLimit(authService.getClientIP(request));
         
         // Authenticate user - let exceptions propagate to GlobalExceptionHandler
         JwtTokenResponse tokenResponse = authService.loginUser(loginRequest);
         
-        // Create the response entity with headers in one step
-        return ResponseEntity.ok(ApiResponse.success(tokenResponse));
+        logger.info("Successfully authenticated user: {}", loginRequest.getUsername());
+
+        // Create cookies for both new tokens
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", tokenResponse.getAccessToken())
+        .httpOnly(true)
+        .secure(true)
+        .sameSite("Strict")
+        .maxAge(Duration.ofHours(1)) // 1 hour
+        .build();
+        
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", tokenResponse.getRefreshToken())
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("Strict")
+            .maxAge(Duration.ofHours(1)) // 1 hour
+            .build();
+        
+        // Create response with cookies
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(ApiResponse.success(tokenResponse));
     }
     
     /**
@@ -124,29 +146,36 @@ public class AuthController {
             .maxAge(Duration.ofHours(1)) // 1 hour
             .build();
         
-        var response = ResponseEntity.ok(ApiResponse.success(tokenResponse));
-        // Add cookies to response
-        response.getHeaders().add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
-        response.getHeaders().add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-        
-        return response;
+        // Create response with cookies
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(ApiResponse.success(tokenResponse));
     }
     
     /**
-     * Validates a JWT token.
+     * Validates a JWT token from cookies.
      * 
-     * @param validateRequest Contains the access token to validate
+     * @param request The HTTP request containing cookies
      * @return Boolean indicating if the token is valid
      */
     @PostMapping("/validate")
     public ResponseEntity<ApiResponse<ValidateTokenResponse>> validateToken(
-            @RequestBody ValidateTokenRequest validateRequest) {
+            HttpServletRequest request) {
         
-        boolean isValid = authService.validateToken(validateRequest.getAccessToken());
+        // Extract access token from cookies
+        String accessToken = GozeHttpUtility.extractAccessTokenFromCookies(request);
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new InvalidTokenException("Access token not found in cookies");
+        }
+        
+
+        boolean isValid = authService.validateToken(accessToken);
         if(!isValid){
             throw new InvalidTokenException("Invalid token");
         }
-        Date expirationDate = authService.getTokenExpirationDate(validateRequest.getAccessToken());
+        
+        Date expirationDate = authService.getTokenExpirationDate(accessToken);
         ValidateTokenResponse validateTokenResponse = new ValidateTokenResponse(expirationDate.toString());
         
         return ResponseEntity.ok(ApiResponse.success(validateTokenResponse));

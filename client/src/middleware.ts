@@ -1,10 +1,22 @@
-import authService from '@/services/authentication.server';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:8080';
+
 const validateToken = async (accessToken: string) => {
-  const response = await authService.validateToken(accessToken);
-  return response.ok;
+  try {
+    const response = await fetch(`${BACKEND_API_URL}/auth/validate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': `accessToken=${accessToken}` // Send token via cookie header
+      },
+      body: JSON.stringify({}), // Empty body since token comes from cookies
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
 }
 
 // Public API routes that don't require authentication
@@ -14,11 +26,11 @@ const PUBLIC_API_ROUTES = [
   '/api/auth/logout',
   '/api/auth/refresh'
 ];
-
+    
 // Public page routes that don't require authentication
 const PUBLIC_PAGE_ROUTES = [
   '/error',
-  '/maintenance',
+  '/maintenance'
   // Note: '/', and /login is removed from public routes as we'll handle it specially
 ];
 
@@ -36,9 +48,9 @@ export async function middleware(request: NextRequest) {
   
   if (isPublicApiRoute || isPublicPageRoute) {
     // Allow access to public routes without authentication
-    return NextResponse.next();
-  }
-  
+        return NextResponse.next();
+    }
+
   // 2. For protected routes, check authentication
   const accessToken = request.cookies.get('accessToken')?.value;
   let isValidToken = false;
@@ -67,13 +79,13 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    /*
+    matcher: [
+        /*
      * Match all request paths except for:
      * 1. Static files (/favicon.ico, /_next/static, /_next/image)
      * 2. Public assets (/public/*)
-     */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-  ],
-}; 
+         */
+        '/((?!_next/static|_next/image|favicon.ico).*)',
+    ],
+};
 

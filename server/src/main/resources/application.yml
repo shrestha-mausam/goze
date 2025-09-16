@@ -69,3 +69,9 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+
+plaid:
+  client-id: ${PLAID_CLIENT_ID}
+  secret: ${PLAID_SECRET}
+  public-key: ${PLAID_PUBLIC_KEY}
+  environment: ${PLAID_ENVIRONMENT}

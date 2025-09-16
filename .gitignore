@@ -2,5 +2,8 @@ server/target/
 server/src/main/resources/application-local.yml.template
 client/node_modules/
 client/.next/
+client/out/
 client/.env.local
+client/.env
+server/.env
 .vscode/settings.json
