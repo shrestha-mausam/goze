@@ -2,12 +2,12 @@ package com.mshrestha.goze.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.mshrestha.goze.dto.api.ApiResponse;
 import com.mshrestha.goze.dto.plaid.*;
+import com.mshrestha.goze.model.PlaidItem;
+import com.mshrestha.goze.model.User;
+import com.mshrestha.goze.repository.UserRepository;
 import com.mshrestha.goze.service.PlaidService;
 import com.mshrestha.goze.security.JwtTokenUtil;
 import com.mshrestha.goze.utils.GozeHttpUtility;
@@ -16,6 +16,9 @@ import com.mshrestha.goze.utils.GsonUtility;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/plaid")
@@ -30,6 +33,9 @@ public class PlaidController {
     
     @Autowired
     private GsonUtility gsonUtility;
+    
+    @Autowired
+    private UserRepository userRepository;
 
 
     @PostMapping("/link_token/create")
@@ -43,12 +49,16 @@ public class PlaidController {
                     .body(ApiResponse.error(null));
             }
             
-            // Extract userId from JWT token
-            String userId = jwtTokenUtil.getUsernameFromToken(accessToken);
+            // Extract username from JWT token
+            String username = jwtTokenUtil.getUsernameFromToken(accessToken);
             
-            // Create request with default values
+            // Look up user by username to get UUID
+            User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+            
+            // Create request with default values using user UUID
             LinkTokenCreateRequest linkTokenRequest = new LinkTokenCreateRequest(
-                userId,
+                user.getId().toString(),
                 "Goze Financial App", // Default client name
                 new String[]{"transactions"}, // Default products
                 new String[]{"US"}, // Default country codes
@@ -87,15 +97,20 @@ public class PlaidController {
                     .body(ApiResponse.error((ExchangePublicTokenResponse) null));
             }
             
-            // Extract userId from JWT token
-            String userId = jwtTokenUtil.getUsernameFromToken(accessToken);
-            logger.info("Extracted userId from token: {}", userId);
+            // Extract username from JWT token
+            String username = jwtTokenUtil.getUsernameFromToken(accessToken);
+            logger.info("Extracted username from token: {}", username);
             
-            // Update request with extracted userId
-            exchangeRequest.setUserId(userId);
+            // Look up user by username to get UUID
+            User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+            
+            // Update request with user UUID
+            exchangeRequest.setUserId(user.getId().toString());
+            logger.info("Set userId to: {}", user.getId());
             
             ExchangePublicTokenResponse response = plaidService.exchangePublicToken(exchangeRequest);
-            logger.info("Successfully exchanged public token for user: {}", userId);
+            logger.info("Successfully exchanged public token for user: {}", user.getId());
             return ResponseEntity.ok(ApiResponse.success(response));
         } catch (Exception e) {
             logger.error("Failed to exchange public token", e);
@@ -104,11 +119,40 @@ public class PlaidController {
         }
     }
 
-    @PostMapping("/create_item")
-    public ResponseEntity<ApiResponse<CreateItemResponse>> storeAccessToken(
-        @RequestBody CreateItemRequest storeAccessTokenRequest,
-        HttpServletRequest request) {
-        return null;
+    @GetMapping("/items")
+    public ResponseEntity<ApiResponse<List<PlaidItem>>> getPlaidItems(HttpServletRequest request) {
+        try {
+            logger.info("Getting Plaid items for user");
+            
+            // Extract accessToken from HTTP cookies
+            String accessToken = GozeHttpUtility.extractAccessTokenFromCookies(request);
+            if (accessToken == null || accessToken.isEmpty()) {
+                logger.warn("Access token not found in cookies");
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(null));
+            }
+            
+            // Extract username from JWT token
+            String username = jwtTokenUtil.getUsernameFromToken(accessToken);
+            
+            // Look up user by username to get UUID
+            User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+            
+            UUID userId = user.getId();
+            logger.info("Extracted userId from token: {}", userId);
+            
+            // Get Plaid items for user
+            List<PlaidItem> plaidItems = plaidService.getPlaidItemsForUser(userId);
+            logger.info("Successfully retrieved {} Plaid items for user: {}", plaidItems.size(), userId);
+            
+            return ResponseEntity.ok(ApiResponse.success(plaidItems));
+            
+        } catch (Exception e) {
+            logger.error("Failed to get Plaid items", e);
+            return ResponseEntity.badRequest()
+                .body(ApiResponse.error(null));
+        }
     }
     
     /**

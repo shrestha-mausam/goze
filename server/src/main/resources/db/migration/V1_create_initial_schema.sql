@@ -59,19 +59,19 @@ CREATE TABLE goze.accounts (
 );
 
 -- Transaction categories
-CREATE TABLE goze.categories (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES goze.users(id) ON DELETE CASCADE,
-  name VARCHAR(100) NOT NULL,
-  color VARCHAR(20),
-  icon VARCHAR(50),
-  parent_id UUID REFERENCES goze.categories(id),
-  is_income BOOLEAN DEFAULT false,
-  is_system BOOLEAN DEFAULT false,
-  display_order INTEGER,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(user_id, name)
-);
+-- CREATE TABLE goze.categories (
+--   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--   user_id UUID NOT NULL REFERENCES goze.users(id) ON DELETE CASCADE,
+--   name VARCHAR(100) NOT NULL,
+--   color VARCHAR(20),
+--   icon VARCHAR(50),
+--   parent_id UUID REFERENCES goze.categories(id),
+--   is_income BOOLEAN DEFAULT false,
+--   is_system BOOLEAN DEFAULT false,
+--   display_order INTEGER,
+--   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+--   UNIQUE(user_id, name)
+-- );
 
 -- Transactions
 CREATE TABLE goze.transactions (
@@ -97,38 +97,38 @@ CREATE TABLE goze.transactions (
 );
 
 -- ML categorization model
-CREATE TABLE goze.ml_categorization_models (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES goze.users(id) ON DELETE CASCADE,
-  model_data BYTEA NOT NULL, -- Serialized ML model
-  accuracy DECIMAL(5, 2),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  active BOOLEAN DEFAULT true
-);
+-- CREATE TABLE goze.ml_categorization_models (
+--   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--   user_id UUID NOT NULL REFERENCES goze.users(id) ON DELETE CASCADE,
+--   model_data BYTEA NOT NULL, -- Serialized ML model
+--   accuracy DECIMAL(5, 2),
+--   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+--   active BOOLEAN DEFAULT true
+-- );
 
--- ML training data
-CREATE TABLE goze.ml_training_data (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES goze.users(id) ON DELETE CASCADE,
-  transaction_id UUID REFERENCES goze.transactions(id) ON DELETE CASCADE,
-  features JSONB NOT NULL,
-  category_id UUID NOT NULL REFERENCES goze.categories(id),
-  is_manually_categorized BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+-- -- ML training data
+-- CREATE TABLE goze.ml_training_data (
+--   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--   user_id UUID NOT NULL REFERENCES goze.users(id) ON DELETE CASCADE,
+--   transaction_id UUID REFERENCES goze.transactions(id) ON DELETE CASCADE,
+--   features JSONB NOT NULL,
+--   category_id UUID NOT NULL REFERENCES goze.categories(id),
+--   is_manually_categorized BOOLEAN DEFAULT true,
+--   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- );
 
--- Audit log for financial data
-CREATE TABLE goze.audit_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES goze.users(id),
-  action VARCHAR(50) NOT NULL,
-  entity_type VARCHAR(50) NOT NULL,
-  entity_id UUID,
-  old_values JSONB,
-  new_values JSONB,
-  ip_address VARCHAR(45),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+-- -- Audit log for financial data
+-- CREATE TABLE goze.audit_logs (
+--   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--   user_id UUID REFERENCES goze.users(id),
+--   action VARCHAR(50) NOT NULL,
+--   entity_type VARCHAR(50) NOT NULL,
+--   entity_id UUID,
+--   old_values JSONB,
+--   new_values JSONB,
+--   ip_address VARCHAR(45),
+--   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- );
 
 -- Indexes for performance
 CREATE INDEX idx_transactions_user_date ON goze.transactions(user_id, date DESC);

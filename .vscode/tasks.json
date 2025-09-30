@@ -17,9 +17,50 @@
             "problemMatcher": []
         },
         {
+            "label": "Debug Goze Spring Boot Backend",
+            "type": "shell",
+            "command": "cd server && mvn spring-boot:run -Dspring-boot.run.jvmArguments='-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005' -Dspring-boot.run.arguments='--spring.profiles.active=${input:profile}'",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "isBackground": true
+        },
+        {
             "label": "Run Goze Next Client Server",
             "type": "shell",
             "command": "cd client && rm -rf node_modules package-lock.json && npm install && npm run build && npm run dev",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Debug Goze Next Client Server",
+            "type": "shell",
+            "command": "cd client && npm run dev",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "isBackground": true
+        },
+        {
+            "label": "Debug Both Server and Client",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "Debug Goze Spring Boot Backend",
+                "Debug Goze Next Client Server"
+            ],
             "group": "build",
             "presentation": {
                 "reveal": "always",

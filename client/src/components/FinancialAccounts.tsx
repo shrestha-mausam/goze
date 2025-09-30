@@ -25,6 +25,7 @@ const FinancialAccounts: React.FC = () => {
     console.log('FinancialAccounts');
     const { themeType } = useTheme();
     const [plaidLinkToken, setPlaidLinkToken] = useState<string | null>(null);
+    const [shouldOpenPlaidLink, setShouldOpenPlaidLink] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const linkTokenExpiration = useRef<string | null>(null);
@@ -89,19 +90,14 @@ const FinancialAccounts: React.FC = () => {
         if (!plaidLinkToken || isLinkTokenExpired()) {
             await generatePlaidLinkToken();
         }
-        
-        // After token generation (or if token already exists), try to open
-        if (ready) {
-            open();
-        } else {
-            // If not ready, wait a bit and try again
-            setTimeout(() => {
-                if (ready) {
-                    open();
-                }
-            }, 100);
-        }
+        setShouldOpenPlaidLink(true);
     };
+
+    useEffect(() => {
+        if (shouldOpenPlaidLink && ready) {
+            open();
+        }
+    }, [shouldOpenPlaidLink, ready, open]);
 
     // Helper function to get the appropriate icon for each account type
     const getAccountIcon = (type: string) => {

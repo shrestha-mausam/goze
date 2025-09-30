@@ -1,4 +1,4 @@
-package com.mshrestha.goze.dto.transactions;
+package com.mshrestha.goze.dto.dashboard;
 
 public class TransactionRequest {
     String userId;

@@ -1,114 +1,246 @@
 package com.mshrestha.goze.service;
 
 import com.mshrestha.goze.dto.plaid.*;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import com.mshrestha.goze.dto.plaid.api.*;
+import com.mshrestha.goze.model.PlaidItem;
+import com.mshrestha.goze.repository.PlaidItemRepository;
+import com.mshrestha.goze.service.AccountService;
+import com.mshrestha.goze.utils.PlaidRestUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PlaidService {
     
-    @Value("${plaid.client-id}")
-    private String clientId;
+    private static final Logger logger = LoggerFactory.getLogger(PlaidService.class);
     
-    @Value("${plaid.secret}")
-    private String secret;
+    @Autowired
+    private PlaidRestUtility plaidRestUtility;
     
-    @Value("${plaid.environment}")
-    private String environment;
+    @Autowired
+    private PlaidItemRepository plaidItemRepository;
     
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    private AccountService accountService;
     
-    private String getBaseUrl() {
-        switch (environment.toLowerCase()) {
-            case "sandbox":
-                return "https://sandbox.plaid.com";
-            case "production":
-                return "https://production.plaid.com";
-            default:
-                return "https://sandbox.plaid.com";
-        }
-    }
-    
-    private HttpHeaders createHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("PLAID-CLIENT-ID", clientId);
-        headers.set("PLAID-SECRET", secret);
-        headers.set("Plaid-Version", "2020-09-14");
-        return headers;
-    }
-    
+    /**
+     * Create a link token for Plaid Link
+     */
     public LinkTokenCreateResponse createLinkToken(LinkTokenCreateRequest request) {
         try {
-            String url = getBaseUrl() + "/link/token/create";
+            logger.info("Creating link token for user: {}", request.getUserId());
             
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("client_name", request.getClientName());
-            requestBody.put("products", new String[]{"transactions"});
-            requestBody.put("country_codes", new String[]{"US"});
-            requestBody.put("language", "en");
-            
-            Map<String, Object> user = new HashMap<>();
-            user.put("client_user_id", request.getUserId());
-            requestBody.put("user", user);
-            
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, createHeaders());
-            
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                url, 
-                HttpMethod.POST, 
-                entity, 
-                new ParameterizedTypeReference<Map<String, Object>>() {}
+            // Create the API request
+            PlaidLinkTokenRequest apiRequest = new PlaidLinkTokenRequest(
+                request.getClientName(),
+                List.of("transactions"),
+                List.of("US"),
+                "en",
+                new PlaidLinkTokenRequest.PlaidUser(request.getUserId()),
+                request.getWebhook(),
+                request.getRedirectUri()
             );
             
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                Map<String, Object> responseBody = response.getBody();
-                return new LinkTokenCreateResponse(
-                    (String) responseBody.get("link_token"),
-                    (String) responseBody.get("expiration")
-                );
-            } else {
-                throw new RuntimeException("Failed to create link token");
-            }
+            // Call Plaid API
+            PlaidLinkTokenResponse apiResponse = plaidRestUtility.createLinkToken(apiRequest);
+            
+            // Convert to internal response
+            LinkTokenCreateResponse response = new LinkTokenCreateResponse(
+                apiResponse.getLinkToken(),
+                apiResponse.getExpiration()
+            );
+            
+            logger.info("Successfully created link token for user: {}", request.getUserId());
+            return response;
+            
         } catch (Exception e) {
+            logger.error("Failed to create link token for user: {}", request.getUserId(), e);
             throw new RuntimeException("Failed to create link token: " + e.getMessage(), e);
         }
     }
     
+    /**
+     * Exchange public token for access token and save Plaid item
+     */
+    @Transactional
     public ExchangePublicTokenResponse exchangePublicToken(ExchangePublicTokenRequest request) {
         try {
-            String url = getBaseUrl() + "/item/public_token/exchange";
+            logger.info("Exchanging public token for user: {}", request.getUserId());
             
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("public_token", request.getPublic_token());
+            // Create the API request
+            PlaidExchangeTokenRequest apiRequest = new PlaidExchangeTokenRequest(request.getPublic_token());
             
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, createHeaders());
+            // Call Plaid API to exchange token
+            PlaidExchangeTokenResponse plaidExchangeTokenResponse = plaidRestUtility.exchangePublicToken(apiRequest);
             
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                url, 
-                HttpMethod.POST, 
-                entity, 
-                new ParameterizedTypeReference<Map<String, Object>>() {}
+            // Get item information from Plaid
+            PlaidItemRequest itemRequest = new PlaidItemRequest(plaidExchangeTokenResponse.getAccessToken());
+            PlaidItemResponse itemResponse = plaidRestUtility.getItem(itemRequest);
+            
+            // Get institution information
+            PlaidInstitutionResponse institutionResponse = null;
+            if (itemResponse.getItem().getInstitutionId() != null) {
+                PlaidInstitutionRequest institutionRequest = new PlaidInstitutionRequest(
+                    itemResponse.getItem().getInstitutionId(),
+                    new String[]{"US"}
+                );
+                institutionResponse = plaidRestUtility.getInstitution(institutionRequest);
+            }
+            
+            // Save or update Plaid item in database
+            UUID userId = UUID.fromString(request.getUserId());
+            PlaidItem savedPlaidItem = saveOrUpdatePlaidItem(
+                userId,
+                plaidExchangeTokenResponse.getAccessToken(),
+                itemResponse,
+                institutionResponse
             );
             
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                Map<String, Object> responseBody = response.getBody();
-                return new ExchangePublicTokenResponse(
-                    (String) responseBody.get("access_token"),
-                    (String) responseBody.get("item_id"),
-                    (String) responseBody.get("request_id")
-                );
-            } else {
-                throw new RuntimeException("Failed to exchange public token");
-            }
+            // Get and save accounts for the associated Plaid item
+            fetchAndSaveAccounts(savedPlaidItem, plaidExchangeTokenResponse.getAccessToken());
+            
+            // Convert to internal response
+            ExchangePublicTokenResponse response = new ExchangePublicTokenResponse(
+                plaidExchangeTokenResponse.getAccessToken(),
+                plaidExchangeTokenResponse.getItemId(),
+                plaidExchangeTokenResponse.getRequestId()
+            );
+            
+            logger.info("Successfully exchanged public token and saved Plaid item for user: {}", request.getUserId());
+            return response;
+            
         } catch (Exception e) {
+            logger.error("Failed to exchange public token for user: {}", request.getUserId(), e);
             throw new RuntimeException("Failed to exchange public token: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Get all Plaid items for a user
+     */
+    public List<PlaidItem> getPlaidItemsForUser(UUID userId) {
+        try {
+            logger.info("Getting Plaid items for user: {}", userId);
+            List<PlaidItem> items = plaidItemRepository.findByUserIdAndActiveTrue(userId);
+            logger.info("Found {} active Plaid items for user: {}", items.size(), userId);
+            return items;
+        } catch (Exception e) {
+            logger.error("Failed to get Plaid items for user: {}", userId, e);
+            throw new RuntimeException("Failed to get Plaid items: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Sync transactions for a Plaid item
+     */
+    public TransactionSyncResponse syncTransactions(String accessToken, String cursor) {
+        try {
+            logger.info("Syncing transactions for access token: {}", accessToken.substring(0, 8) + "...");
+            
+            // Create the API request
+            PlaidTransactionSyncRequest apiRequest = new PlaidTransactionSyncRequest(
+                accessToken,
+                cursor,
+                null // count - use default
+            );
+            
+            // Call Plaid API
+            TransactionSyncResponse apiResponse = plaidRestUtility.syncTransactions(apiRequest);
+            
+            logger.info("Successfully synced transactions. Added: {}, Modified: {}, Removed: {}", 
+                       apiResponse.getAdded() != null ? apiResponse.getAdded().size() : 0,
+                       apiResponse.getModified() != null ? apiResponse.getModified().size() : 0,
+                       apiResponse.getRemoved() != null ? apiResponse.getRemoved().size() : 0);
+            
+            return apiResponse;
+            
+        } catch (Exception e) {
+            logger.error("Failed to sync transactions for access token: {}", accessToken.substring(0, 8) + "...", e);
+            throw new RuntimeException("Failed to sync transactions: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Fetch accounts from Plaid and save them to database
+     */
+    private void fetchAndSaveAccounts(PlaidItem plaidItem, String accessToken) {
+        try {
+            logger.info("Fetching accounts for Plaid item: {} (user: {})", 
+                       plaidItem.getItemId(), plaidItem.getUserId());
+            
+            // Create the accounts request
+            PlaidAccountsRequest accountsRequest = new PlaidAccountsRequest(accessToken);
+            
+            // Call Plaid API to get accounts
+            PlaidAccountsResponse accountsResponse = plaidRestUtility.getAccounts(accountsRequest);
+            
+            // Process and save accounts
+            accountService.processAccountsFromPlaid(plaidItem.getUserId(), plaidItem.getId(), accountsResponse);
+            
+            logger.info("Successfully fetched and saved {} accounts for Plaid item: {}", 
+                       accountsResponse.getAccounts() != null ? accountsResponse.getAccounts().size() : 0,
+                       plaidItem.getItemId());
+            
+        } catch (Exception e) {
+            logger.error("Failed to fetch accounts for Plaid item: {}", plaidItem.getItemId(), e);
+            throw new RuntimeException("Failed to fetch accounts: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Save or update Plaid item in database
+     */
+    private PlaidItem saveOrUpdatePlaidItem(
+            UUID userId,
+            String accessToken,
+            PlaidItemResponse itemResponse,
+            PlaidInstitutionResponse institutionResponse) {
+        
+        try {
+            // Check if item already exists
+            PlaidItem existingItem = plaidItemRepository
+                .findByUserIdAndItemId(userId, itemResponse.getItem().getItemId())
+                .orElse(null);
+            
+            PlaidItem plaidItem;
+            if (existingItem != null) {
+                // Update existing item
+                plaidItem = existingItem;
+                plaidItem.setAccessToken(accessToken);
+                logger.info("Updating existing Plaid item: {}", plaidItem.getItemId());
+            } else {
+                // Create new item
+                plaidItem = new PlaidItem();
+                plaidItem.setUserId(userId);
+                plaidItem.setItemId(itemResponse.getItem().getItemId());
+                plaidItem.setAccessToken(accessToken);
+                logger.info("Creating new Plaid item: {}", plaidItem.getItemId());
+            }
+            
+            // Set item information
+            if (itemResponse.getItem() != null) {
+                plaidItem.setInstitutionId(itemResponse.getItem().getInstitutionId());
+            }
+            
+            // Set institution information
+            if (institutionResponse != null && institutionResponse.getInstitution() != null) {
+                plaidItem.setInstitutionName(institutionResponse.getInstitution().getName());
+            }
+            
+            // Save to database
+            PlaidItem savedItem = plaidItemRepository.save(plaidItem);
+            logger.info("Successfully saved Plaid item: {} for user: {}", savedItem.getItemId(), userId);
+            
+            return savedItem;
+            
+        } catch (Exception e) {
+            logger.error("Failed to save Plaid item for user: {}", userId, e);
+            throw new RuntimeException("Failed to save Plaid item: " + e.getMessage(), e);
         }
     }
 }
