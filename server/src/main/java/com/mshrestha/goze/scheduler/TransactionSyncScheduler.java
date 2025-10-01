@@ -65,8 +65,6 @@ public class TransactionSyncScheduler {
                 }
             }
 
-            
-            
             logger.info("Transaction sync completed. Success: {}, Errors: {}", successCount, errorCount);
             
         } catch (Exception e) {
@@ -82,7 +80,7 @@ public class TransactionSyncScheduler {
             logger.debug("Syncing transactions for item: {} (user: {})", item.getItemId(), item.getUserId());
             
             // Get the cursor for this item (stored in the database or null for first sync)
-            String cursor = getCursorForItem(item);
+            String cursor = item.getCursor();
             
             // Sync transactions from Plaid
             TransactionSyncResponse syncResponse = plaidService.syncTransactions(item.getAccessToken(), cursor);

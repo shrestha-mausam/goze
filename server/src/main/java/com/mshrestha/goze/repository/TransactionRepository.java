@@ -42,10 +42,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
      */
     List<Transaction> findByUserIdAndPendingTrueOrderByDateDesc(UUID userId);
     
-    /**
-     * Find transactions by category
-     */
-    List<Transaction> findByUserIdAndCategoryIdOrderByDateDesc(UUID userId, UUID categoryId);
     
     /**
      * Find transactions by merchant name (case insensitive)

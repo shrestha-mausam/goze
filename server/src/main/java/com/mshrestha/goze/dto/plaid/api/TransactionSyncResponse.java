@@ -90,9 +90,6 @@ public class TransactionSyncResponse {
         @SerializedName("category")
         private List<String> category;
         
-        @SerializedName("category_id")
-        private String categoryId;
-        
         @SerializedName("check_number")
         private String checkNumber;
         

@@ -16,15 +16,15 @@ CREATE TABLE goze.users (
   account_locked_until TIMESTAMP WITH TIME ZONE
 );
 
--- User settings
-CREATE TABLE goze.user_settings (
-  user_id UUID PRIMARY KEY REFERENCES goze.users(id) ON DELETE CASCADE,
-  theme VARCHAR(50) DEFAULT 'light',
-  currency VARCHAR(10) DEFAULT 'USD',
-  notification_preferences JSONB DEFAULT '{}',
-  preferences JSONB DEFAULT '{}',
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+-- -- User settings
+-- CREATE TABLE goze.user_settings (
+--   user_id UUID PRIMARY KEY REFERENCES goze.users(id) ON DELETE CASCADE,
+--   theme VARCHAR(50) DEFAULT 'light',
+--   currency VARCHAR(10) DEFAULT 'USD',
+--   notification_preferences JSONB DEFAULT '{}',
+--   preferences JSONB DEFAULT '{}',
+--   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- );
 
 -- Plaid items (connections to financial institutions)
 CREATE TABLE goze.plaid_items (
@@ -32,6 +32,7 @@ CREATE TABLE goze.plaid_items (
   user_id UUID NOT NULL REFERENCES goze.users(id) ON DELETE CASCADE,
   item_id VARCHAR(100) NOT NULL,
   access_token VARCHAR(100) NOT NULL,
+  cursor VARCHAR(256),
   institution_id VARCHAR(50),
   institution_name VARCHAR(100),
   is_active BOOLEAN DEFAULT true,
@@ -84,9 +85,7 @@ CREATE TABLE goze.transactions (
   name VARCHAR(255) NOT NULL,
   merchant_name VARCHAR(255),
   pending BOOLEAN DEFAULT false,
-  category_id UUID REFERENCES goze.categories(id),
-  plaid_category VARCHAR(100)[],
-  plaid_category_id VARCHAR(50),
+  plaid_category VARCHAR(255),
   location JSONB,
   payment_meta JSONB,
   notes TEXT,
@@ -132,7 +131,5 @@ CREATE TABLE goze.transactions (
 
 -- Indexes for performance
 CREATE INDEX idx_transactions_user_date ON goze.transactions(user_id, date DESC);
-CREATE INDEX idx_transactions_category ON goze.transactions(user_id, category_id);
 CREATE INDEX idx_transactions_account ON goze.transactions(account_id);
 CREATE INDEX idx_accounts_user ON goze.accounts(user_id);
-CREATE INDEX idx_categories_user ON goze.categories(user_id);

@@ -1,7 +1,9 @@
 package com.mshrestha.goze.model;
 
+import com.mshrestha.goze.utils.JsonbType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
@@ -41,19 +43,16 @@ public class Transaction {
     
     @Column(name = "pending")
     private Boolean pending = false;
+
+
+    @Column(name = "plaid_category", length = 255)
+    private String plaidCategory;
     
-    @Column(name = "category_id")
-    private UUID categoryId;
-    
-    @Column(name = "plaid_category", columnDefinition = "VARCHAR(100)[]")
-    private String[] plaidCategory;
-    
-    @Column(name = "plaid_category_id", length = 50)
-    private String plaidCategoryId;
-    
+    @Type(JsonbType.class)
     @Column(name = "location", columnDefinition = "JSONB")
     private String location;
     
+    @Type(JsonbType.class)
     @Column(name = "payment_meta", columnDefinition = "JSONB")
     private String paymentMeta;
     
@@ -157,28 +156,12 @@ public class Transaction {
         this.pending = pending;
     }
     
-    public UUID getCategoryId() {
-        return categoryId;
-    }
-    
-    public void setCategoryId(UUID categoryId) {
-        this.categoryId = categoryId;
-    }
-    
-    public String[] getPlaidCategory() {
+    public String getPlaidCategory() {
         return plaidCategory;
     }
     
-    public void setPlaidCategory(String[] plaidCategory) {
+    public void setPlaidCategory(String plaidCategory) {
         this.plaidCategory = plaidCategory;
-    }
-    
-    public String getPlaidCategoryId() {
-        return plaidCategoryId;
-    }
-    
-    public void setPlaidCategoryId(String plaidCategoryId) {
-        this.plaidCategoryId = plaidCategoryId;
     }
     
     public String getLocation() {

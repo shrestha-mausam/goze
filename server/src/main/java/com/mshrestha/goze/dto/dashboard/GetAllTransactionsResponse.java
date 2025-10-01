@@ -28,9 +28,7 @@ public class GetAllTransactionsResponse {
         private String name;
         private String merchantName;
         private Boolean pending;
-        private UUID categoryId;
-        private String[] plaidCategory;
-        private String plaidCategoryId;
+        private String plaidCategory;       // Primary category from personal finance category
         private String location;
         private String paymentMeta;
         private String notes;

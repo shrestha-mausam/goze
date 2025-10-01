@@ -149,14 +149,11 @@ public class TransactionService {
         transaction.setAmount(BigDecimal.valueOf(plaidTransaction.getAmount()));
         transaction.setDate(LocalDate.parse(plaidTransaction.getDate()));
         transaction.setName(plaidTransaction.getName());
+        transaction.setPlaidCategory(plaidTransaction.getPersonalFinanceCategory().getPrimary());
         transaction.setMerchantName(plaidTransaction.getMerchantName());
         transaction.setPending(plaidTransaction.getPending());
+        transaction.setPlaidCategory(plaidTransaction.getPersonalFinanceCategory().getPrimary());
         
-        // Set Plaid category information
-        if (plaidTransaction.getCategory() != null) {
-            transaction.setPlaidCategory(plaidTransaction.getCategory().toArray(new String[0]));
-        }
-        transaction.setPlaidCategoryId(plaidTransaction.getCategoryId());
         
         // Set location as JSON string
         if (plaidTransaction.getLocation() != null) {
@@ -180,12 +177,7 @@ public class TransactionService {
         transaction.setName(plaidTransaction.getName());
         transaction.setMerchantName(plaidTransaction.getMerchantName());
         transaction.setPending(plaidTransaction.getPending());
-        
-        // Update Plaid category information
-        if (plaidTransaction.getCategory() != null) {
-            transaction.setPlaidCategory(plaidTransaction.getCategory().toArray(new String[0]));
-        }
-        transaction.setPlaidCategoryId(plaidTransaction.getCategoryId());
+        transaction.setPlaidCategory(plaidTransaction.getPersonalFinanceCategory().getPrimary());
         
         // Update location
         if (plaidTransaction.getLocation() != null) {
@@ -236,20 +228,6 @@ public class TransactionService {
         if (transactionOpt.isPresent()) {
             Transaction transaction = transactionOpt.get();
             transaction.setNotes(notes);
-            return transactionRepository.save(transaction);
-        }
-        throw new RuntimeException("Transaction not found: " + transactionId);
-    }
-    
-    /**
-     * Update transaction category
-     */
-    @Transactional
-    public Transaction updateTransactionCategory(UUID transactionId, UUID categoryId) {
-        Optional<Transaction> transactionOpt = transactionRepository.findById(transactionId);
-        if (transactionOpt.isPresent()) {
-            Transaction transaction = transactionOpt.get();
-            transaction.setCategoryId(categoryId);
             return transactionRepository.save(transaction);
         }
         throw new RuntimeException("Transaction not found: " + transactionId);

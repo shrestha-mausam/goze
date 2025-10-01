@@ -33,6 +33,9 @@ public class PlaidItem {
     
     @Column(name = "institution_name")
     private String institutionName;
+
+    @Column(name = "cursor")
+    private String cursor;
     
     @Column(name = "is_active")
     private boolean active = true;
