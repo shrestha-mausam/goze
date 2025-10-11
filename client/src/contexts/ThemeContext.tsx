@@ -8,11 +8,15 @@ import React, {
     ReactNode,
 } from 'react';
 import { ThemeType, getTheme } from '@/styles/theme';
+import { FontFamily, FONT_CONFIGS, DEFAULT_FONT, applyFontFamily, loadFont } from '@/lib/fonts';
 
 type ThemeContextType = {
     themeType: ThemeType;
     toggleTheme: () => void;
     theme: ReturnType<typeof getTheme>;
+    fontFamily: FontFamily;
+    setFontFamily: (font: FontFamily) => void;
+    availableFonts: typeof FONT_CONFIGS;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -21,6 +25,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
     children,
 }) => {
     const [themeType, setThemeType] = useState<ThemeType>('light');
+    const [fontFamily, setFontFamilyState] = useState<FontFamily>(DEFAULT_FONT);
 
     // Get the current theme object
     const theme = getTheme(themeType);
@@ -28,6 +33,18 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
     // Toggle between light and dark themes
     const toggleTheme = () => {
         setThemeType((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+    };
+
+    // Set font family
+    const setFontFamily = async (font: FontFamily) => {
+        try {
+            await loadFont(font);
+            applyFontFamily(font);
+            setFontFamilyState(font);
+            localStorage.setItem('goze-font-family', font);
+        } catch (error) {
+            console.error('Failed to load font:', error);
+        }
     };
 
     // Apply theme to document when it changes
@@ -65,8 +82,33 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
         document.body.style.color = theme.textColor;
     }, [themeType, theme]);
 
+    // Initialize font from localStorage and apply default font
+    useEffect(() => {
+        const savedFont = localStorage.getItem('goze-font-family') as FontFamily;
+        if (savedFont && FONT_CONFIGS[savedFont]) {
+            setFontFamily(savedFont);
+        } else {
+            // Apply default font on first load
+            applyFontFamily(DEFAULT_FONT);
+        }
+    }, []);
+
+    // Apply font when fontFamily changes
+    useEffect(() => {
+        applyFontFamily(fontFamily);
+    }, [fontFamily]);
+
     return (
-        <ThemeContext.Provider value={{ themeType, toggleTheme, theme }}>
+        <ThemeContext.Provider 
+            value={{ 
+                themeType, 
+                toggleTheme, 
+                theme, 
+                fontFamily, 
+                setFontFamily, 
+                availableFonts: FONT_CONFIGS 
+            }}
+        >
             {children}
         </ThemeContext.Provider>
     );

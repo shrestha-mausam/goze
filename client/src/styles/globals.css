@@ -1,3 +1,8 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 /* Import PrimeReact styles */
 @import 'primereact/resources/primereact.min.css';
 @import 'primeicons/primeicons.css';
@@ -5,9 +10,14 @@
 
 /* Typography */
 :root {
-    --font-family:
-        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-        sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    /* Default font family - Inter */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    
+    /* Alternative fonts for easy switching */
+    --font-family-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-family-roboto: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-family-poppins: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-family-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
     /* Font sizes */
     --font-size-xs: 0.75rem; /* 12px */
@@ -167,4 +177,492 @@ a {
 
 .p-datatable.p-datatable-dark .p-datatable-tbody > tr:hover {
     background-color: #383838;
+}
+
+/* Dark theme styles for Reports page */
+.dark-dropdown .p-dropdown {
+    background-color: transparent !important;
+    background: transparent !important;
+    border: 1px solid #8066FF !important;
+    color: #f9fafb !important;
+    border-radius: 6px !important;
+    height: 2.5rem !important;
+    min-height: 2.5rem !important;
+}
+
+.dark-dropdown .p-dropdown .p-dropdown-label {
+    background-color: transparent !important;
+    color: #8066FF !important;
+}
+
+.dark-dropdown .p-dropdown .p-dropdown-trigger {
+    background-color: transparent !important;
+    color: #f9fafb !important;
+}
+
+.dark-dropdown .p-dropdown:not(.p-disabled):hover {
+    border-color: #8066FF !important;
+    background-color: rgba(128, 102, 255, 0.05) !important;
+    outline: none !important;
+}
+
+.dark-dropdown .p-dropdown:not(.p-disabled).p-focus {
+    border-color: #8066FF !important;
+    box-shadow: 0 0 0 1px #8066FF !important;
+    background-color: rgba(128, 102, 255, 0.05) !important;
+    outline: none !important;
+}
+
+.dark-dropdown .p-dropdown-panel {
+    background-color: #374151 !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid #8066FF !important;
+    border-radius: 6px !important;
+}
+
+.dark-dropdown .p-dropdown-item {
+    background-color: transparent !important;
+    color: #f9fafb !important;
+}
+
+.dark-dropdown .p-dropdown-item:hover {
+    background-color: rgba(147, 51, 234, 0.1) !important;
+}
+
+.dark-dropdown .p-dropdown-label {
+    color: #8066FF !important;
+    font-weight: 500 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+    text-stroke: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    border-radius: 0 !important;
+    border-width: 0 !important;
+    border-style: none !important;
+}
+
+.dark-dropdown .p-dropdown-trigger {
+    color: #f9fafb !important;
+}
+
+.dark-dropdown .p-dropdown-trigger:hover {
+    color: #9333ea !important;
+}
+
+/* Override any default PrimeReact dropdown styling in dark mode */
+[data-theme="dark"] .dark-dropdown .p-dropdown,
+.dark .dark-dropdown .p-dropdown,
+.dark-dropdown .p-dropdown {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+[data-theme="dark"] .dark-dropdown .p-dropdown .p-dropdown-label,
+.dark .dark-dropdown .p-dropdown .p-dropdown-label,
+.dark-dropdown .p-dropdown .p-dropdown-label {
+    background-color: transparent !important;
+    background: transparent !important;
+    color: #f9fafb !important;
+}
+
+[data-theme="dark"] .dark-dropdown .p-dropdown .p-dropdown-trigger,
+.dark .dark-dropdown .p-dropdown .p-dropdown-trigger,
+.dark-dropdown .p-dropdown .p-dropdown-trigger {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+.dark-input .p-inputtext {
+    background-color: transparent !important;
+    background: transparent !important;
+    border: 1px solid #8066FF !important;
+    color: #f9fafb !important;
+    height: 2.5rem !important;
+    min-height: 2.5rem !important;
+}
+
+.dark-input .p-inputtext:focus {
+    border-color: #8066FF !important;
+    box-shadow: 0 0 0 1px #8066FF !important;
+    caret-color: #ffffff !important;
+    background-color: transparent !important;
+    background: transparent !important;
+    outline: none !important;
+}
+
+.dark-input .p-inputtext {
+    border-color: #8066FF !important;
+    outline: none !important;
+}
+
+.dark-input .p-inputtext::placeholder {
+    color: #9ca3af !important;
+}
+
+.dark-datatable .p-datatable-thead > tr > th {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+    border-bottom: 0.5px solid #374151 !important;
+    font-weight: normal !important;
+}
+
+.dark-datatable .p-datatable-tbody > tr {
+    background-color: transparent !important;
+    color: #9ca3af !important;
+    border-color: #374151 !important;
+    border-bottom: 0.5px solid #374151 !important;
+}
+
+/* More specific selectors to override PrimeReact defaults */
+[data-theme="dark"] .dark-datatable .p-datatable-tbody > tr,
+.dark .dark-datatable .p-datatable-tbody > tr,
+.dark-datatable .p-datatable-tbody > tr > td {
+    border-color: #374151 !important;
+    border-bottom: 0.5px solid #374151 !important;
+}
+
+[data-theme="dark"] .dark-datatable .p-datatable-tbody > tr:not(:last-child),
+.dark .dark-datatable .p-datatable-tbody > tr:not(:last-child) {
+    border-bottom: 0.5px solid #374151 !important;
+}
+
+/* Comprehensive override for all border properties */
+[data-theme="dark"] .p-datatable .p-datatable-tbody > tr,
+.dark .p-datatable .p-datatable-tbody > tr,
+[data-theme="dark"] .p-datatable .p-datatable-tbody > tr > td,
+.dark .p-datatable .p-datatable-tbody > tr > td {
+    border-color: #374151 !important;
+    border-bottom-color: #374151 !important;
+    border-top-color: #374151 !important;
+    border-left-color: #374151 !important;
+    border-right-color: #374151 !important;
+}
+
+/* Force grey borders for all DataTable rows in dark mode */
+[data-theme="dark"] .p-datatable-sm .p-datatable-tbody > tr,
+.dark .p-datatable-sm .p-datatable-tbody > tr,
+[data-theme="dark"] .p-datatable-sm .p-datatable-tbody > tr > td,
+.dark .p-datatable-sm .p-datatable-tbody > tr > td {
+    border-bottom: 0.5px solid #374151 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+
+/* Override PrimeReact's default border styling completely */
+[data-theme="dark"] .p-datatable .p-datatable-tbody tr,
+.dark .p-datatable .p-datatable-tbody tr {
+    border-bottom: 0.5px solid #374151 !important;
+}
+
+.dark-datatable .p-datatable-tbody > tr:hover {
+    background-color: rgba(147, 51, 234, 0.05) !important;
+}
+
+.dark-datatable .p-datatable-tbody > tr:nth-child(even) {
+    background-color: rgba(147, 51, 234, 0.02) !important;
+}
+
+.dark-datatable .p-paginator {
+    background-color: transparent !important;
+    color: #f9fafb !important;
+    border-color: #9333ea !important;
+}
+
+.dark-datatable .p-paginator .p-paginator-page,
+.dark-datatable .p-paginator .p-paginator-first,
+.dark-datatable .p-paginator .p-paginator-prev,
+.dark-datatable .p-paginator .p-paginator-next,
+.dark-datatable .p-paginator .p-paginator-last {
+    color: #f9fafb !important;
+    border-color: #9333ea !important;
+}
+
+.dark-datatable .p-paginator .p-paginator-page.p-highlight {
+    background-color: #9333ea !important;
+    color: #ffffff !important;
+}
+
+/* Remove internal borders from dropdown label/text area */
+[data-theme="dark"] .p-dropdown .p-dropdown-label,
+.dark .p-dropdown .p-dropdown-label {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+    text-stroke: 0 !important;
+    color: #8066FF !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+/* Remove any inner borders from all dropdown child elements */
+[data-theme="dark"] .dark-dropdown *,
+.dark .dark-dropdown * {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Re-apply the outer border only to the main dropdown element */
+[data-theme="dark"] .dark-dropdown .p-dropdown,
+.dark .dark-dropdown .p-dropdown {
+    border: 1px solid #8066FF !important;
+    border-color: #8066FF !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Ensure IconField matches dropdown height */
+[data-theme="dark"] .p-iconfield,
+.dark .p-iconfield {
+    height: 2.5rem !important;
+    min-height: 2.5rem !important;
+}
+
+[data-theme="dark"] .p-iconfield .p-inputtext,
+.dark .p-iconfield .p-inputtext {
+    height: 2.5rem !important;
+    min-height: 2.5rem !important;
+}
+
+/* Make all DataTable headers normal weight instead of bold */
+.p-datatable .p-datatable-thead > tr > th {
+    font-weight: normal !important;
+}
+
+/* Ensure consistent height for all form elements in reports page */
+[data-theme="dark"] .border-round.p-6 .p-dropdown,
+.dark .border-round.p-6 .p-dropdown,
+[data-theme="dark"] .border-round.p-6 .p-inputtext,
+.dark .border-round.p-6 .p-inputtext,
+[data-theme="dark"] .border-round.p-6 .p-iconfield,
+.dark .border-round.p-6 .p-iconfield {
+    height: 2.5rem !important;
+    min-height: 2.5rem !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Force transparent backgrounds for all form elements */
+[data-theme="dark"] .p-dropdown,
+.dark .p-dropdown,
+[data-theme="dark"] .p-inputtext,
+.dark .p-inputtext,
+[data-theme="dark"] .p-iconfield,
+.dark .p-iconfield {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    outline: none !important;
+    border-color: #8066FF !important;
+}
+
+/* Remove all outlines and fix border colors */
+[data-theme="dark"] .p-inputtext,
+.dark .p-inputtext,
+[data-theme="dark"] .p-dropdown,
+.dark .p-dropdown {
+    outline: none !important;
+    border-color: #8066FF !important;
+}
+
+[data-theme="dark"] .p-inputtext:focus,
+.dark .p-inputtext:focus,
+[data-theme="dark"] .p-dropdown:focus,
+.dark .p-dropdown:focus {
+    outline: none !important;
+    border-color: #8066FF !important;
+    box-shadow: 0 0 0 1px #8066FF !important;
+}
+
+/* Override any inline white background styles */
+[data-theme="dark"] .p-dropdown[style*="background"],
+.dark .p-dropdown[style*="background"],
+[data-theme="dark"] .p-inputtext[style*="background"],
+.dark .p-inputtext[style*="background"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+/* Nuclear option - force transparent backgrounds everywhere */
+[data-theme="dark"] .border-round.p-6 .p-dropdown *,
+.dark .border-round.p-6 .p-dropdown *,
+[data-theme="dark"] .border-round.p-6 .p-inputtext,
+.dark .border-round.p-6 .p-inputtext,
+[data-theme="dark"] .border-round.p-6 .p-iconfield *,
+.dark .border-round.p-6 .p-iconfield * {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+/* Specifically target dropdown label and input areas */
+[data-theme="dark"] .dark-dropdown .p-dropdown .p-dropdown-label,
+.dark .dark-dropdown .p-dropdown .p-dropdown-label,
+[data-theme="dark"] .dark-dropdown .p-dropdown .p-inputtext,
+.dark .dark-dropdown .p-dropdown .p-inputtext {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Center dropdown text */
+[data-theme="dark"] .p-dropdown .p-dropdown-label,
+.dark .p-dropdown .p-dropdown-label,
+[data-theme="dark"] .dark-dropdown .p-dropdown .p-dropdown-label,
+.dark .dark-dropdown .p-dropdown .p-dropdown-label {
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Additional dropdown panel styling */
+[data-theme="dark"] .p-dropdown-panel,
+.dark .p-dropdown-panel,
+[data-theme="dark"] .dark-dropdown .p-dropdown-panel,
+.dark .dark-dropdown .p-dropdown-panel {
+    background-color: #374151 !important;
+    background: #374151 !important;
+    border: 1px solid #8066FF !important;
+    border-radius: 6px !important;
+}
+
+/* Dropdown items styling */
+[data-theme="dark"] .p-dropdown-item,
+.dark .p-dropdown-item,
+[data-theme="dark"] .dark-dropdown .p-dropdown-item,
+.dark .dark-dropdown .p-dropdown-item {
+    background-color: transparent !important;
+    color: #f9fafb !important;
+    border: none !important;
+    outline: none !important;
+}
+
+[data-theme="dark"] .p-dropdown-item:hover,
+.dark .p-dropdown-item:hover,
+[data-theme="dark"] .dark-dropdown .p-dropdown-item:hover,
+.dark .dark-dropdown .p-dropdown-item:hover {
+    background-color: rgba(128, 102, 255, 0.1) !important;
+}
+
+/* Ensure Reports page header is white in dark mode */
+[data-theme="dark"] h1,
+.dark h1,
+.dark-theme h1 {
+    color: #ffffff !important;
+}
+
+/* Specifically for Reports page header */
+[data-theme="dark"] .reports-header,
+.dark .reports-header,
+.reports-header.dark-header {
+    color: #ffffff !important;
+}
+
+/* Force white text for all summary card elements in dark mode */
+[data-theme="dark"] .summary-card h3,
+.dark .summary-card h3,
+[data-theme="dark"] .summary-card h4,
+.dark .summary-card h4,
+[data-theme="dark"] .summary-card span,
+.dark .summary-card span,
+[data-theme="dark"] .summary-card div,
+.dark .summary-card div {
+    color: #ffffff !important;
+}
+
+/* Force white text for legend elements */
+[data-theme="dark"] .legend-section h4,
+.dark .legend-section h4,
+[data-theme="dark"] .legend-section span,
+.dark .legend-section span,
+[data-theme="dark"] .legend-section div,
+.dark .legend-section div {
+    color: #ffffff !important;
+}
+
+/* Force white text for all summary card text in dark mode */
+[data-theme="dark"] .border-round.p-4 h3,
+.dark .border-round.p-4 h3,
+[data-theme="dark"] .border-round.p-4 h4,
+.dark .border-round.p-4 h4,
+[data-theme="dark"] .border-round.p-4 span,
+.dark .border-round.p-4 span {
+    color: #ffffff !important;
+}
+
+/* Keep date text grey in dark mode - higher specificity */
+[data-theme="dark"] .summary-card .date-text,
+.dark .summary-card .date-text,
+[data-theme="dark"] .legend-section .date-text,
+.dark .legend-section .date-text,
+[data-theme="dark"] .border-round.p-4 .date-text,
+.dark .border-round.p-4 .date-text,
+[data-theme="dark"] .date-text,
+.dark .date-text {
+    color: #d1d5db !important;
+}
+
+[data-theme="dark"] .summary-card .date-text span,
+.dark .summary-card .date-text span,
+[data-theme="dark"] .legend-section .date-text span,
+.dark .legend-section .date-text span,
+[data-theme="dark"] .border-round.p-4 .date-text span,
+.dark .border-round.p-4 .date-text span,
+[data-theme="dark"] .date-text span,
+.dark .date-text span {
+    color: #d1d5db !important;
+}
+
+/* Remove outline from dropdown overlay panel */
+[data-theme="dark"] .p-dropdown-panel,
+.dark .p-dropdown-panel,
+[data-theme="dark"] .dark-dropdown .p-dropdown-panel,
+.dark .dark-dropdown .p-dropdown-panel {
+    outline: none !important;
+    border: 1px solid #8066FF !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Fix dropdown text alignment and chevron icon color */
+[data-theme="dark"] .dark-dropdown .p-dropdown-label,
+.dark .dark-dropdown .p-dropdown-label {
+    text-align: left !important;
+    justify-content: flex-start !important;
+}
+
+[data-theme="dark"] .dark-dropdown .p-dropdown-trigger,
+.dark .dark-dropdown .p-dropdown-trigger,
+[data-theme="dark"] .dark-dropdown .p-dropdown-trigger .p-dropdown-trigger-icon,
+.dark .dark-dropdown .p-dropdown-trigger .p-dropdown-trigger-icon,
+[data-theme="dark"] .dark-dropdown .pi-chevron-down,
+.dark .dark-dropdown .pi-chevron-down {
+    color: #8066FF !important;
+}
+
+/* Ensure dropdown label container is left-aligned */
+[data-theme="dark"] .dark-dropdown .p-dropdown-label-container,
+.dark .dark-dropdown .p-dropdown-label-container {
+    text-align: left !important;
+    justify-content: flex-start !important;
 }

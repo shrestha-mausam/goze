@@ -118,42 +118,6 @@ public class PlaidController {
                 .body(ApiResponse.error((ExchangePublicTokenResponse) null));
         }
     }
-
-    @GetMapping("/items")
-    public ResponseEntity<ApiResponse<List<PlaidItem>>> getPlaidItems(HttpServletRequest request) {
-        try {
-            logger.info("Getting Plaid items for user");
-            
-            // Extract accessToken from HTTP cookies
-            String accessToken = GozeHttpUtility.extractAccessTokenFromCookies(request);
-            if (accessToken == null || accessToken.isEmpty()) {
-                logger.warn("Access token not found in cookies");
-                return ResponseEntity.badRequest()
-                    .body(ApiResponse.error(null));
-            }
-            
-            // Extract username from JWT token
-            String username = jwtTokenUtil.getUsernameFromToken(accessToken);
-            
-            // Look up user by username to get UUID
-            User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
-            
-            UUID userId = user.getId();
-            logger.info("Extracted userId from token: {}", userId);
-            
-            // Get Plaid items for user
-            List<PlaidItem> plaidItems = plaidService.getPlaidItemsForUser(userId);
-            logger.info("Successfully retrieved {} Plaid items for user: {}", plaidItems.size(), userId);
-            
-            return ResponseEntity.ok(ApiResponse.success(plaidItems));
-            
-        } catch (Exception e) {
-            logger.error("Failed to get Plaid items", e);
-            return ResponseEntity.badRequest()
-                .body(ApiResponse.error(null));
-        }
-    }
     
     /**
      * Example endpoint demonstrating Gson usage for JSON serialization/deserialization.

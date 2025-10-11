@@ -4,100 +4,157 @@ import React, { useState } from 'react';
 import { Button } from 'primereact/button';
 import { Chart } from 'primereact/chart';
 import { classNames } from 'primereact/utils';
+import { Transaction } from '@/lib/types';
 
-// Sample data for charts
-const generateSampleData = () => {
-    // Weekly data
-    const weeklyData = {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+// Generate chart data from real transactions
+const generateChartData = (transactions: Transaction[], timeframe: string) => {
+    let labels: string[] = [];
+    let expenseData: number[] = [];
+    let incomeData: number[] = [];
+
+    if (timeframe === 'weekly') {
+        // Generate weekly data for the last 7 days
+        const weeklyExpenses: { [key: string]: number } = {};
+        const weeklyIncome: { [key: string]: number } = {};
+
+        transactions.forEach(transaction => {
+            const amount = transaction.amount;
+            const date = new Date(transaction.date);
+            const dayKey = date.toISOString().split('T')[0];
+            
+            if (amount < 0) {
+                weeklyExpenses[dayKey] = (weeklyExpenses[dayKey] || 0) + Math.abs(amount);
+            } else {
+                weeklyIncome[dayKey] = (weeklyIncome[dayKey] || 0) + amount;
+            }
+        });
+
+        // Generate last 7 days
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dayKey = date.toISOString().split('T')[0];
+            const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short' });
+            
+            labels.push(dayLabel);
+            expenseData.push(weeklyExpenses[dayKey] || 0);
+            incomeData.push(weeklyIncome[dayKey] || 0);
+        }
+    } else {
+        // Generate monthly data for the last 12 months
+        const monthlyExpenses: { [key: string]: number } = {};
+        const monthlyIncome: { [key: string]: number } = {};
+
+        transactions.forEach(transaction => {
+            const amount = transaction.amount;
+            const date = new Date(transaction.date);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            
+            if (amount < 0) {
+                monthlyExpenses[monthKey] = (monthlyExpenses[monthKey] || 0) + Math.abs(amount);
+            } else {
+                monthlyIncome[monthKey] = (monthlyIncome[monthKey] || 0) + amount;
+            }
+        });
+
+        // Generate last 12 months
+        for (let i = 11; i >= 0; i--) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - i);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            const monthLabel = date.toLocaleDateString('en-US', { month: 'short' });
+            
+            labels.push(monthLabel);
+            expenseData.push(monthlyExpenses[monthKey] || 0);
+            incomeData.push(monthlyIncome[monthKey] || 0);
+        }
+    }
+
+    // Calculate totals for the selected timeframe only
+    const totalIncome = incomeData.reduce((sum, amount) => sum + amount, 0);
+    const totalExpenses = expenseData.reduce((sum, amount) => sum + amount, 0);
+
+    // Line chart data
+    const lineChartData = {
+        labels: labels,
         datasets: [
             {
                 label: 'Expenses',
-                data: [65, 59, 80, 81, 56, 55, 40],
+                data: expenseData,
                 fill: false,
                 borderColor: '#4F46E5',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
                 tension: 0.4,
+                pointBackgroundColor: '#4F46E5',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
             },
             {
                 label: 'Income',
-                data: [28, 48, 40, 19, 86, 27, 90],
+                data: incomeData,
                 fill: false,
                 borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 tension: 0.4,
+                pointBackgroundColor: '#10B981',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
             },
         ],
     };
 
-    // Monthly data
-    const monthlyData = {
-        labels: [
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-            'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec',
-        ],
+    // Bar chart data
+    const barChartData = {
+        labels: labels,
         datasets: [
             {
                 label: 'Expenses',
-                data: [65, 59, 80, 81, 56, 55, 40, 55, 60, 70, 65, 75],
-                fill: false,
+                data: expenseData,
+                backgroundColor: 'rgba(79, 70, 229, 0.8)',
                 borderColor: '#4F46E5',
-                tension: 0.4,
+                borderWidth: 1,
             },
             {
                 label: 'Income',
-                data: [28, 48, 40, 19, 86, 27, 90, 65, 59, 80, 81, 56],
-                fill: false,
+                data: incomeData,
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
                 borderColor: '#10B981',
-                tension: 0.4,
+                borderWidth: 1,
             },
         ],
     };
 
-    // Pie chart data
-    const pieData = {
-        labels: [
-            'Housing',
-            'Food',
-            'Transportation',
-            'Entertainment',
-            'Utilities',
-            'Other',
-        ],
+    // Pie chart data for income vs expenses
+    const pieChartData = {
+        labels: ['Income', 'Expenses'],
         datasets: [
             {
-                data: [30, 20, 15, 10, 15, 10],
+                data: [totalIncome, totalExpenses],
                 backgroundColor: [
-                    '#4F46E5',
-                    '#10B981',
-                    '#F59E0B',
-                    '#EF4444',
-                    '#8B5CF6',
-                    '#EC4899',
+                    '#10B981', // Green for Income
+                    '#EF4444', // Red for Expenses
                 ],
             },
         ],
     };
 
-    return { weeklyData, monthlyData, pieData };
+    return { lineChartData, barChartData, pieChartData, totalIncome, totalExpenses };
 };
 
 interface ChartOverviewProps {
     themeType: string;
+    transactions: Transaction[];
+    loading: boolean;
+    error: string | null;
 }
 
-const ChartOverview: React.FC<ChartOverviewProps> = ({ themeType }) => {
-    const [chartData] = useState(generateSampleData());
+const ChartOverview: React.FC<ChartOverviewProps> = ({ themeType, transactions, loading, error }) => {
     const [chartType, setChartType] = useState('line');
     const [timeframe, setTimeframe] = useState('weekly');
+
+    const chartData = generateChartData(transactions, timeframe);
 
     // Format currency
     const formatCurrency = (value: number) => {
@@ -116,8 +173,13 @@ const ChartOverview: React.FC<ChartOverviewProps> = ({ themeType }) => {
                 display: false,
             },
             tooltip: {
-                mode: 'index',
+                mode: 'index' as const,
                 intersect: false,
+                backgroundColor: themeType === 'dark' ? '#1f2937' : '#ffffff',
+                titleColor: themeType === 'dark' ? '#ffffff' : '#495057',
+                bodyColor: themeType === 'dark' ? '#ffffff' : '#495057',
+                borderColor: themeType === 'dark' ? '#374151' : '#e5e7eb',
+                borderWidth: 1,
             },
         },
         scales: {
@@ -150,7 +212,7 @@ const ChartOverview: React.FC<ChartOverviewProps> = ({ themeType }) => {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'bottom',
+                position: 'bottom' as const,
                 labels: {
                     color: themeType === 'dark' ? '#ffffff' : '#495057',
                     usePointStyle: true,
@@ -179,9 +241,7 @@ const ChartOverview: React.FC<ChartOverviewProps> = ({ themeType }) => {
                             ></span>
                             <span className="text-500 text-sm">Income: </span>
                             <span className="font-medium text-green-500 ml-1">
-                                {formatCurrency(
-                                    timeframe === 'weekly' ? 3500 : 12500
-                                )}
+                                {formatCurrency(chartData.totalIncome)}
                             </span>
                         </div>
                         <div className="flex align-items-center">
@@ -191,9 +251,7 @@ const ChartOverview: React.FC<ChartOverviewProps> = ({ themeType }) => {
                             ></span>
                             <span className="text-500 text-sm">Expenses: </span>
                             <span className="font-medium text-red-500 ml-1">
-                                {formatCurrency(
-                                    timeframe === 'weekly' ? 1800 : 7200
-                                )}
+                                {formatCurrency(chartData.totalExpenses)}
                             </span>
                         </div>
                     </div>
@@ -223,6 +281,15 @@ const ChartOverview: React.FC<ChartOverviewProps> = ({ themeType }) => {
                         tooltipOptions={{ position: 'bottom' }}
                     />
                     <Button
+                        icon="pi pi-chart-bar"
+                        className={classNames('p-button-text p-button-sm', {
+                            'p-button-plain': chartType !== 'bar',
+                        })}
+                        onClick={() => setChartType('bar')}
+                        tooltip="Bar Chart"
+                        tooltipOptions={{ position: 'bottom' }}
+                    />
+                    <Button
                         icon="pi pi-chart-pie"
                         className={classNames('p-button-text p-button-sm', {
                             'p-button-plain': chartType !== 'pie',
@@ -234,27 +301,45 @@ const ChartOverview: React.FC<ChartOverviewProps> = ({ themeType }) => {
                 </div>
             </div>
 
-            <div style={{ height: '300px', width: '100%' }}>
-                {chartType === 'line' ? (
-                    <Chart
-                        type="line"
-                        data={
-                            timeframe === 'weekly'
-                                ? chartData.weeklyData
-                                : chartData.monthlyData
-                        }
-                        options={chartOptions}
-                        style={{ width: '100%', height: '100%' }}
-                    />
-                ) : (
-                    <Chart
-                        type="pie"
-                        data={chartData.pieData}
-                        options={pieChartOptions}
-                        style={{ width: '100%', height: '100%' }}
-                    />
-                )}
-            </div>
+            {loading && (
+                <div className="flex justify-content-center align-items-center" style={{ height: '250px' }}>
+                    <i className="pi pi-spin pi-spinner text-2xl"></i>
+                    <span className="ml-2">Loading chart data...</span>
+                </div>
+            )}
+
+            {error && (
+                <div className="p-3 mb-2 bg-red-100 border border-red-300 text-red-700 rounded">
+                    Error: {error}
+                </div>
+            )}
+
+            {!loading && !error && (
+                <div style={{ height: '250px', width: '100%' }}>
+                    {chartType === 'line' ? (
+                        <Chart
+                            type="line"
+                            data={chartData.lineChartData}
+                            options={chartOptions}
+                            style={{ width: '100%', height: '100%' }}
+                        />
+                    ) : chartType === 'bar' ? (
+                        <Chart
+                            type="bar"
+                            data={chartData.barChartData}
+                            options={chartOptions}
+                            style={{ width: '100%', height: '100%' }}
+                        />
+                    ) : (
+                        <Chart
+                            type="pie"
+                            data={chartData.pieChartData}
+                            options={pieChartOptions}
+                            style={{ width: '100%', height: '100%' }}
+                        />
+                    )}
+                </div>
+            )}
         </div>
     );
 };

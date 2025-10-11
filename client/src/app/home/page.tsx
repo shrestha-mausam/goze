@@ -1,16 +1,78 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
 import CategoryManagement from '@/components/CategoryManagement';
 import ChartOverview from '@/components/ChartOverview';
 import FinancialAccounts from '@/components/FinancialAccounts';
 import Sidebar from '@/components/Sidebar';
 import Topbar from '@/components/Topbar';
-import Transactions from '@/components/Transactions';
+import ExpenseTransactionsList from '@/components/ExpenseTransactionsList';
 import { useTheme } from '@/contexts/ThemeContext';
+import { getAllTransactions, getAllAccounts, getExpenseTransactions } from '@/lib/api.client';
+import { Transaction, Account } from '@/lib/types';
+
+interface HomeData {
+    allTransactions: Transaction[];
+    expenseTransactions: Transaction[];
+    accounts: Account[];
+    loading: boolean;
+    error: string | null;
+}
 
 export default function Home() {
     const { themeType } = useTheme();
+    const [data, setData] = useState<HomeData>({
+        allTransactions: [],
+        expenseTransactions: [],
+        accounts: [],
+        loading: true,
+        error: null,
+    });
+
+    // Centralized data fetching
+    useEffect(() => {
+        const fetchAllData = async () => {
+            try {
+                setData(prev => ({ ...prev, loading: true, error: null }));
+
+                // Fetch all data in parallel
+                const [allTransactionsResponse, expenseTransactionsResponse, accountsResponse] = await Promise.all([
+                    getAllTransactions(),
+                    getExpenseTransactions(),
+                    getAllAccounts(),
+                ]);
+
+                // Check if all requests were successful
+                if (!allTransactionsResponse.ok || !expenseTransactionsResponse.ok || !accountsResponse.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const [allTransactionsData, expenseTransactionsData, accountsData] = await Promise.all([
+                    allTransactionsResponse.json(),
+                    expenseTransactionsResponse.json(),
+                    accountsResponse.json(),
+                ]);
+
+                setData({
+                    allTransactions: allTransactionsData.data?.transactions || [],
+                    expenseTransactions: expenseTransactionsData.data?.transactions || [],
+                    accounts: accountsData.data?.accounts || [],
+                    loading: false,
+                    error: null,
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                setData(prev => ({
+                    ...prev,
+                    loading: false,
+                    error: error instanceof Error ? error.message : 'Failed to load data',
+                }));
+            }
+        };
+
+        fetchAllData();
+    }, []);
 
     return (
         <AppLayout title="Home | Goze">
@@ -26,15 +88,20 @@ export default function Home() {
                     {/* Top Section - Chart Overview */}
                     <div
                         className={`mb-3 border-round ${themeType === 'dark' ? 'bg-gray-900' : 'bg-white'}`}
-                        style={{ maxHeight: '400px', overflow: 'auto' }}
+                        style={{ height: '400px' }}
                     >
-                        <ChartOverview themeType={themeType} />
+                        <ChartOverview 
+                            themeType={themeType} 
+                            transactions={data.allTransactions}
+                            loading={data.loading}
+                            error={data.error}
+                        />
                     </div>
 
                     {/* Bottom Section - Categories and Accounts */}
                     <div className="grid">
                         {/* Categories */}
-                        <div className="col-6 pr-2">
+                        <div className="col-6 pr-1">
                             <div
                                 className={`h-full border-round ${themeType === 'dark' ? 'bg-gray-900' : 'bg-white'}`}
                                 style={{
@@ -42,12 +109,16 @@ export default function Home() {
                                     overflow: 'auto',
                                 }}
                             >
-                                <CategoryManagement />
+                                <CategoryManagement 
+                                    transactions={data.expenseTransactions}
+                                    loading={data.loading}
+                                    error={data.error}
+                                />
                             </div>
                         </div>
 
                         {/* Accounts */}
-                        <div className="col-6 pl-2">
+                        <div className="col-6 pl-1">
                             <div
                                 className={`h-full border-round ${themeType === 'dark' ? 'bg-gray-900' : 'bg-white'}`}
                                 style={{
@@ -55,7 +126,11 @@ export default function Home() {
                                     overflow: 'auto',
                                 }}
                             >
-                                <FinancialAccounts />
+                                <FinancialAccounts 
+                                    accounts={data.accounts}
+                                    loading={data.loading}
+                                    error={data.error}
+                                />
                             </div>
                         </div>
                     </div>
@@ -70,7 +145,11 @@ export default function Home() {
                             overflow: 'auto',
                         }}
                     >
-                        <Transactions />
+                        <ExpenseTransactionsList 
+                            transactions={data.expenseTransactions}
+                            loading={data.loading}
+                            error={data.error}
+                        />
                     </div>
                 </div>
             </div>

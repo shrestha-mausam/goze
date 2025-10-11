@@ -25,6 +25,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     List<Transaction> findByUserIdOrderByDateDesc(UUID userId);
     
     /**
+     * Find expense transactions for a user (amount < 0)
+     */
+    List<Transaction> findByUserIdAndAmountLessThanOrderByDateDesc(UUID userId, java.math.BigDecimal amount);
+    
+    /**
      * Find transactions for a user within a date range
      */
     @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND t.date BETWEEN :startDate AND :endDate ORDER BY t.date DESC")

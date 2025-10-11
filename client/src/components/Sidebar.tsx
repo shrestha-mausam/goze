@@ -179,7 +179,7 @@ const Sidebar: React.FC = () => {
                             primeIcon="pi pi-chart-bar"
                             faIcon={faChartBar}
                             tooltip="Reports"
-                            onClick={() => showComingSoon('Reports')}
+                            onClick={() => router.push('/reports')}
                         />
                         <IconButton
                             primeIcon="pi pi-cog"

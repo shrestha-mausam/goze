@@ -4,7 +4,6 @@ import com.mshrestha.goze.dto.plaid.*;
 import com.mshrestha.goze.dto.plaid.api.*;
 import com.mshrestha.goze.model.PlaidItem;
 import com.mshrestha.goze.repository.PlaidItemRepository;
-import com.mshrestha.goze.service.AccountService;
 import com.mshrestha.goze.utils.PlaidRestUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

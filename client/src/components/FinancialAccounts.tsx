@@ -11,17 +11,15 @@ import {
     usePlaidLink,
 } from 'react-plaid-link';
 import { createPlaidLinkToken, exchangePlaidPublicToken } from '@/lib/api.client';
-import { PlaidLinkTokenResponse } from '@/lib/types';
+import { PlaidLinkTokenResponse, Account } from '@/lib/types';
 
-// Sample accounts data
-const accounts = [
-    { name: 'Checking Account', balance: 2450.65, type: 'bank' },
-    { name: 'Savings Account', balance: 8750.42, type: 'bank' },
-    { name: 'Credit Card', balance: -450.25, type: 'credit' },
-    { name: 'Investment', balance: 15320.75, type: 'investment' },
-];
+interface FinancialAccountsProps {
+    accounts: Account[];
+    loading: boolean;
+    error: string | null;
+}
 
-const FinancialAccounts: React.FC = () => {
+const FinancialAccounts: React.FC<FinancialAccountsProps> = ({ accounts, loading: accountsLoading, error: accountsError }) => {
     console.log('FinancialAccounts');
     const { themeType } = useTheme();
     const [plaidLinkToken, setPlaidLinkToken] = useState<string | null>(null);
@@ -50,6 +48,7 @@ const FinancialAccounts: React.FC = () => {
     };
 
     const { open, ready } = usePlaidLink(config);
+
 
     const generatePlaidLinkToken = async (): Promise<void> => {
         setIsLoading(true);
@@ -102,12 +101,14 @@ const FinancialAccounts: React.FC = () => {
     // Helper function to get the appropriate icon for each account type
     const getAccountIcon = (type: string) => {
         switch (type) {
-            case 'bank':
+            case 'depository':
                 return 'pi-building';
             case 'credit':
                 return 'pi-credit-card';
             case 'investment':
                 return 'pi-chart-line';
+            case 'loan':
+                return 'pi-money-bill';
             default:
                 return 'pi-wallet';
         }
@@ -121,7 +122,10 @@ const FinancialAccounts: React.FC = () => {
     };
 
     // Format currency
-    const formatCurrency = (value: number) => {
+    const formatCurrency = (value: number | null | undefined) => {
+        if (value === null || value === undefined) {
+            return '$0.00';
+        }
         return value.toLocaleString('en-US', {
             style: 'currency',
             currency: 'USD',
@@ -129,9 +133,9 @@ const FinancialAccounts: React.FC = () => {
     };
 
     return (
-        <div className="p-0 flex flex-column h-full">
+        <div className="p-3 flex flex-column h-full">
             <div
-                className={`flex justify-content-between align-items-center pb-2 mb-2 ${getHeaderDividerClass()}`}
+                className={`flex justify-content-between align-items-center pb-2 mb-3 ${getHeaderDividerClass()}`}
             >
                 <div className="flex align-items-center">
                     <i className="pi pi-wallet text-primary mr-2"></i>
@@ -154,27 +158,61 @@ const FinancialAccounts: React.FC = () => {
                 </div>
             )}
 
-            <div className="accounts-list flex-grow-1 overflow-auto">
-                {accounts.map((account, index) => (
-                    <div
-                        key={index}
-                        className="p-2 flex justify-content-between align-items-center"
-                        style={{ backgroundColor: 'transparent' }}
-                    >
-                        <div className="flex align-items-center">
-                            <i
-                                className={`pi ${getAccountIcon(account.type)} mr-2 ${account.balance >= 0 ? 'text-blue-500' : 'text-pink-500'}`}
-                            ></i>
-                            <span className="font-medium">{account.name}</span>
+            {accountsError && (
+                <div className="p-2 mb-2 bg-red-100 border border-red-300 text-red-700 rounded">
+                    Error: {accountsError}
+                </div>
+            )}
+
+            {accountsLoading && (
+                <div className="flex justify-content-center align-items-center p-4">
+                    <i className="pi pi-spin pi-spinner text-2xl"></i>
+                    <span className="ml-2">Loading accounts...</span>
+                </div>
+            )}
+
+            {!accountsLoading && !accountsError && (
+                <div className="accounts-list flex-grow-1 overflow-auto">
+                    {accounts.length === 0 ? (
+                        <div className="flex justify-content-center align-items-center p-4 text-500">
+                            <i className="pi pi-info-circle mr-2"></i>
+                            <span>No accounts found. Add an account to get started.</span>
                         </div>
-                        <span
-                            className={`font-medium ${account.balance >= 0 ? 'text-blue-500' : 'text-pink-500'}`}
-                        >
-                            {formatCurrency(account.balance)}
-                        </span>
-                    </div>
-                ))}
-            </div>
+                    ) : (
+                        accounts.map((account) => (
+                            <div
+                                key={account.accountId}
+                                className="p-2 flex justify-content-between align-items-center"
+                                style={{ backgroundColor: 'transparent' }}
+                            >
+                                <div className="flex align-items-center">
+                                    <i
+                                        className={`pi ${getAccountIcon(account.type)} mr-2 ${(account.currentBalance || 0) >= 0 ? 'text-blue-500' : 'text-pink-500'}`}
+                                    ></i>
+                                    <div>
+                                        <div className="font-medium">{account.name}</div>
+                                        {account.mask && (
+                                            <div className="text-sm text-500">****{account.mask}</div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div
+                                        className={`font-medium ${(account.currentBalance || 0) >= 0 ? 'text-blue-500' : 'text-pink-500'}`}
+                                    >
+                                        {formatCurrency(account.currentBalance)}
+                                    </div>
+                                    {account.availableBalance !== undefined && account.availableBalance !== account.currentBalance && (
+                                        <div className="text-sm text-500">
+                                            Available: {formatCurrency(account.availableBalance)}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
         </div>
     );
 };

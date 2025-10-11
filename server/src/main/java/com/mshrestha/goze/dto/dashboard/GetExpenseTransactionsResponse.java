@@ -8,13 +8,16 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Response DTO for getting expense transactions.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetAllTransactionsResponse {
+public class GetExpenseTransactionsResponse {
     private List<TransactionDto> transactions;
     private int totalCount;
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -26,7 +29,7 @@ public class GetAllTransactionsResponse {
         private String name;
         private String merchantName;
         private Boolean pending;
-        private String plaidCategory;       // Primary category from personal finance category
+        private String plaidCategory;     // Primary category from personal finance category
         private String location;
         private String paymentMeta;
         private String notes;

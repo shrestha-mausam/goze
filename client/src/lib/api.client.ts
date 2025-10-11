@@ -2,7 +2,7 @@
  * Client-side API helpers for making requests to Next.js API routes
  */
 
-import { ErrRespDataToFrontend, LoginRequest, PlaidExchangePublicTokenRequest, RegisterRequest } from "@/lib/types";
+import { ErrRespDataToFrontend, LoginRequest, PlaidExchangePublicTokenRequest, RegisterRequest, GetAllTransactionsRequest, GetAllAccountsRequest, GetAllTransactionsResponse, GetAllAccountsResponse, GetExpenseTransactionsRequest, GetExpenseTransactionsResponse } from "@/lib/types";
 import { StatusCodes } from 'http-status-codes';
 import { NextResponse } from "next/server";
 
@@ -122,6 +122,87 @@ export async function exchangePlaidPublicToken(publicToken: string): Promise<Res
         const errRespDataToClient: ErrRespDataToFrontend = {
             status: StatusCodes.INTERNAL_SERVER_ERROR,
             description: 'Error occurred while exchanging public token',
+        }
+        return new NextResponse(JSON.stringify(errRespDataToClient), {
+            status: StatusCodes.INTERNAL_SERVER_ERROR
+        });
+    }
+}
+
+/**
+ * Gets all transactions for the authenticated user
+ */
+export async function getAllTransactions(): Promise<Response> {
+    try {
+        const requestBody: GetAllTransactionsRequest = {};
+
+        return await fetch('/api/dashboard/transactions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(requestBody),
+        });
+    } catch (error) {
+        console.error('Get all transactions error:', error);
+        const errRespDataToClient: ErrRespDataToFrontend = {
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            description: 'Error occurred while fetching transactions',
+        }
+        return new NextResponse(JSON.stringify(errRespDataToClient), {
+            status: StatusCodes.INTERNAL_SERVER_ERROR
+        });
+    }
+}
+
+/**
+ * Gets all accounts for the authenticated user
+ */
+export async function getAllAccounts(): Promise<Response> {
+    try {
+        const requestBody: GetAllAccountsRequest = {};
+
+        return await fetch('/api/dashboard/accounts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(requestBody),
+        });
+    } catch (error) {
+        console.error('Get all accounts error:', error);
+        const errRespDataToClient: ErrRespDataToFrontend = {
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            description: 'Error occurred while fetching accounts',
+        }
+        return new NextResponse(JSON.stringify(errRespDataToClient), {
+            status: StatusCodes.INTERNAL_SERVER_ERROR
+        });
+    }
+}
+
+/**
+ * Gets expense transactions for the authenticated user
+ */
+export async function getExpenseTransactions(): Promise<Response> {
+    try {
+        const requestBody: GetExpenseTransactionsRequest = {};
+
+        return await fetch('/api/dashboard/transactions/expenses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(requestBody),
+        });
+    } catch (error) {
+        console.error('Get expense transactions error:', error);
+        const errRespDataToClient: ErrRespDataToFrontend = {
+            status: StatusCodes.INTERNAL_SERVER_ERROR,
+            description: 'Error occurred while fetching expense transactions',
         }
         return new NextResponse(JSON.stringify(errRespDataToClient), {
             status: StatusCodes.INTERNAL_SERVER_ERROR

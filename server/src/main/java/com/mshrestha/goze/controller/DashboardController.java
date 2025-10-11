@@ -5,6 +5,8 @@ import com.mshrestha.goze.dto.dashboard.GetAllAccountsRequest;
 import com.mshrestha.goze.dto.dashboard.GetAllAccountsResponse;
 import com.mshrestha.goze.dto.dashboard.GetAllTransactionsRequest;
 import com.mshrestha.goze.dto.dashboard.GetAllTransactionsResponse;
+import com.mshrestha.goze.dto.dashboard.GetExpenseTransactionsRequest;
+import com.mshrestha.goze.dto.dashboard.GetExpenseTransactionsResponse;
 import com.mshrestha.goze.model.Account;
 import com.mshrestha.goze.model.Transaction;
 import com.mshrestha.goze.model.User;
@@ -45,6 +47,83 @@ public class DashboardController {
     @Autowired
     private UserRepository userRepository;
     
+    /**
+     * Get all accounts for the authenticated user
+     */
+    @PostMapping("/accounts/get/all")
+    public ResponseEntity<String> getAllAccounts(
+            HttpServletRequest httpRequest,
+            @RequestBody GetAllAccountsRequest request) {
+        
+        try {
+            logger.info("Received request to get all accounts");
+            logger.debug("Request body: {}", gsonUtility.toPrettyJson(request));
+            
+            // Extract access token from cookies (consistent with other controllers)
+            String accessToken = GozeHttpUtility.extractAccessTokenFromCookies(httpRequest);
+            if (accessToken == null) {
+                logger.error("No access token found in request");
+                return ResponseEntity.status(401).body(gsonUtility.toPrettyJson(
+                    ApiResponse.error("Access token is required")));
+            }
+            
+            // Extract username from JWT token
+            String username = jwtTokenUtil.getUsernameFromToken(accessToken);
+            logger.info("Extracted username from token: {}", username);
+            
+            // Look up user by username to get UUID
+            User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+            
+            // Use the user ID from the authenticated user (from JWT token)
+            UUID userId = user.getId();
+            logger.info("Using userId from authenticated user: {}", userId);
+            
+            // Get all accounts for the authenticated user
+            List<Account> accounts = accountService.getAccountsForUser(userId);
+            logger.info("Found {} accounts for user: {}", accounts.size(), userId);
+            
+            // Convert Account entities to DTOs
+            List<GetAllAccountsResponse.AccountDto> accountDtos = accounts.stream()
+                .map(this::convertAccountToDto)
+                .collect(Collectors.toList());
+            
+            // Create response
+            GetAllAccountsResponse response = new GetAllAccountsResponse(
+                accountDtos,
+                accountDtos.size()
+            );
+            
+            logger.info("Successfully retrieved {} accounts for user: {}", accounts.size(), userId);
+            return ResponseEntity.ok(gsonUtility.toPrettyJson(ApiResponse.success(response)));
+            
+        } catch (Exception e) {
+            logger.error("Failed to get accounts", e);
+            return ResponseEntity.status(500).body(gsonUtility.toPrettyJson(
+                ApiResponse.error("Failed to get accounts: " + e.getMessage())));
+        }
+    }
+
+    /**
+     * Convert Account entity to AccountDto
+     */
+    private GetAllAccountsResponse.AccountDto convertAccountToDto(Account account) {
+        return new GetAllAccountsResponse.AccountDto(
+            account.getPlaidItemId(),
+            account.getAccountId(),
+            account.getName(),
+            account.getMask(),
+            account.getOfficialName(),
+            account.getType(),
+            account.getSubtype(),
+            account.getCurrentBalance(),
+            account.getAvailableBalance(),
+            account.getCurrencyCode(),
+            account.getActive(),
+            account.getLastUpdated() != null ? account.getLastUpdated().toString() : null
+        );
+    }
+
     /**
      * Get all transactions for the authenticated user
      */
@@ -106,69 +185,10 @@ public class DashboardController {
     }
     
     /**
-     * Get all accounts for the authenticated user
-     */
-    @PostMapping("/accounts/get/all")
-    public ResponseEntity<String> getAllAccounts(
-            HttpServletRequest httpRequest,
-            @RequestBody GetAllAccountsRequest request) {
-        
-        try {
-            logger.info("Received request to get all accounts");
-            logger.debug("Request body: {}", gsonUtility.toPrettyJson(request));
-            
-            // Extract access token from cookies (consistent with other controllers)
-            String accessToken = GozeHttpUtility.extractAccessTokenFromCookies(httpRequest);
-            if (accessToken == null) {
-                logger.error("No access token found in request");
-                return ResponseEntity.status(401).body(gsonUtility.toPrettyJson(
-                    ApiResponse.error("Access token is required")));
-            }
-            
-            // Extract username from JWT token
-            String username = jwtTokenUtil.getUsernameFromToken(accessToken);
-            logger.info("Extracted username from token: {}", username);
-            
-            // Look up user by username to get UUID
-            User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
-            
-            // Use the user ID from the authenticated user (from JWT token)
-            UUID userId = user.getId();
-            logger.info("Using userId from authenticated user: {}", userId);
-            
-            // Get all accounts for the authenticated user
-            List<Account> accounts = accountService.getAccountsForUser(userId);
-            logger.info("Found {} accounts for user: {}", accounts.size(), userId);
-            
-            // Convert Account entities to DTOs
-            List<GetAllAccountsResponse.AccountDto> accountDtos = accounts.stream()
-                .map(this::convertAccountToDto)
-                .collect(Collectors.toList());
-            
-            // Create response
-            GetAllAccountsResponse response = new GetAllAccountsResponse(
-                accountDtos,
-                accountDtos.size()
-            );
-            
-            logger.info("Successfully retrieved {} accounts for user: {}", accounts.size(), userId);
-            return ResponseEntity.ok(gsonUtility.toPrettyJson(ApiResponse.success(response)));
-            
-        } catch (Exception e) {
-            logger.error("Failed to get accounts", e);
-            return ResponseEntity.status(500).body(gsonUtility.toPrettyJson(
-                ApiResponse.error("Failed to get accounts: " + e.getMessage())));
-        }
-    }
-    
-    /**
      * Convert Transaction entity to TransactionDto
      */
     private GetAllTransactionsResponse.TransactionDto convertToDto(Transaction transaction) {
         return new GetAllTransactionsResponse.TransactionDto(
-            transaction.getId(),
-            transaction.getUserId(),
             transaction.getAccountId(),
             transaction.getPlaidTransactionId(),
             transaction.getAmount(),
@@ -187,24 +207,81 @@ public class DashboardController {
     }
     
     /**
-     * Convert Account entity to AccountDto
+     * Get expense transactions for the authenticated user
      */
-    private GetAllAccountsResponse.AccountDto convertAccountToDto(Account account) {
-        return new GetAllAccountsResponse.AccountDto(
-            account.getId(),
-            account.getUserId(),
-            account.getPlaidItemId(),
-            account.getAccountId(),
-            account.getName(),
-            account.getMask(),
-            account.getOfficialName(),
-            account.getType(),
-            account.getSubtype(),
-            account.getCurrentBalance(),
-            account.getAvailableBalance(),
-            account.getCurrencyCode(),
-            account.getActive(),
-            account.getLastUpdated() != null ? account.getLastUpdated().toString() : null
+    @PostMapping("/transactions/get/expenses")
+    public ResponseEntity<String> getExpenseTransactions(
+            HttpServletRequest httpRequest,
+            @RequestBody GetExpenseTransactionsRequest request) {
+
+        try {
+            logger.info("Received request to get expense transactions");
+            logger.debug("Request body: {}", gsonUtility.toPrettyJson(request));
+
+            // Extract access token from cookies (consistent with other controllers)
+            String accessToken = GozeHttpUtility.extractAccessTokenFromCookies(httpRequest);
+            if (accessToken == null) {
+                logger.error("No access token found in request");
+                return ResponseEntity.status(401).body(gsonUtility.toPrettyJson(
+                    ApiResponse.error("Access token is required")));
+            }
+
+            // Extract username from JWT token
+            String username = jwtTokenUtil.getUsernameFromToken(accessToken);
+            logger.info("Extracted username from token: {}", username);
+
+            // Look up user by username to get UUID
+            User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+            // Use the user ID from the authenticated user (from JWT token)
+            UUID userId = user.getId();
+            logger.info("Using userId from authenticated user: {}", userId);
+
+            // Get expense transactions for the authenticated user
+            List<Transaction> transactions = transactionService.getExpenseTransactionsForUser(userId);
+            logger.info("Found {} expense transactions for user: {}", transactions.size(), userId);
+
+            // Convert Transaction entities to DTOs
+            List<GetExpenseTransactionsResponse.TransactionDto> transactionDtos = transactions.stream()
+                .map(this::convertExpenseTransactionToDto)
+                .collect(Collectors.toList());
+
+            // Create response
+            GetExpenseTransactionsResponse response = new GetExpenseTransactionsResponse(
+                transactionDtos,
+                transactionDtos.size()
+            );
+
+            logger.info("Successfully retrieved {} expense transactions for user: {}", transactions.size(), userId);
+            return ResponseEntity.ok(gsonUtility.toPrettyJson(ApiResponse.success(response)));
+
+        } catch (Exception e) {
+            logger.error("Failed to get expense transactions", e);
+            return ResponseEntity.status(500).body(gsonUtility.toPrettyJson(
+                ApiResponse.error("Failed to get expense transactions: " + e.getMessage())));
+        }
+    }
+
+    /**
+     * Convert Transaction entity to ExpenseTransactionDto
+     */
+    private GetExpenseTransactionsResponse.TransactionDto convertExpenseTransactionToDto(Transaction transaction) {
+        return new GetExpenseTransactionsResponse.TransactionDto(
+            transaction.getAccountId(),
+            transaction.getPlaidTransactionId(),
+            transaction.getAmount(),
+            transaction.getDate() != null ? transaction.getDate().toString() : null,
+            transaction.getName(),
+            transaction.getMerchantName(),
+            transaction.getPending(),
+            transaction.getPlaidCategory(),
+            transaction.getLocation(),
+            transaction.getPaymentMeta(),
+            transaction.getNotes(),
+            transaction.getExcludedFromBudget(),
+            transaction.getCreatedAt() != null ? transaction.getCreatedAt().toString() : null,
+            transaction.getUpdatedAt() != null ? transaction.getUpdatedAt().toString() : null
         );
     }
 }

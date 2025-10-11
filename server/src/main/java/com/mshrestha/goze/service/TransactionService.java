@@ -197,6 +197,13 @@ public class TransactionService {
     public List<Transaction> getTransactionsForUser(UUID userId) {
         return transactionRepository.findByUserIdOrderByDateDesc(userId);
     }
+
+    /**
+     * Get expense transactions for a user (amount < 0)
+     */
+    public List<Transaction> getExpenseTransactionsForUser(UUID userId) {
+        return transactionRepository.findByUserIdAndAmountLessThanOrderByDateDesc(userId, BigDecimal.ZERO);
+    }
     
     /**
      * Get transactions for a user within date range

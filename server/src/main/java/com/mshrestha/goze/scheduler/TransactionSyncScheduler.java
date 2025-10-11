@@ -42,7 +42,7 @@ public class TransactionSyncScheduler {
      * Scheduled task to sync transactions once daily at midnight.
      * Runs at 00:00:00 every day.
      */
-    @Scheduled(cron = "0 * * * * ?") // Run at midnight every day 0 0 0 * * * // every minute example: 0 * * * * ?
+    @Scheduled(cron = "0 0 0 * * *") // Run at midnight every day 0 0 0 * * * // every minute example: 0 * * * * ?
     public void syncAllTransactions() {
         logger.info("Starting scheduled transaction sync at: {}", LocalDateTime.now());
         

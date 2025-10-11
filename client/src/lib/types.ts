@@ -193,3 +193,90 @@ export interface ErrRespDataToFrontend {
     status: number;
     description: string;
 }
+
+// ==========================================
+// DASHBOARD TYPES
+// ==========================================
+
+/**
+ * Transaction data from backend
+ */
+export interface Transaction {
+    accountId: string;
+    plaidTransactionId: string;
+    amount: number;
+    date: string;
+    name: string;
+    merchantName?: string;
+    pending: boolean;
+    plaidCategory?: string;
+    location?: string;
+    paymentMeta?: string;
+    notes?: string;
+    excludedFromBudget: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+/**
+ * Account data from backend
+ */
+export interface Account {
+    plaidItemId: string;
+    accountId: string;
+    name: string;
+    mask?: string;
+    officialName?: string;
+    type: string;
+    subtype?: string;
+    currentBalance?: number;
+    availableBalance?: number;
+    currencyCode?: string;
+    active: boolean;
+    lastUpdated: string;
+}
+
+/**
+ * Dashboard API responses
+ */
+export interface GetAllTransactionsResponse {
+    success: boolean;
+    data: {
+        transactions: Transaction[];
+        totalCount: number;
+    };
+}
+
+export interface GetAllAccountsResponse {
+    success: boolean;
+    data: {
+        accounts: Account[];
+        totalCount: number;
+    };
+}
+
+/**
+ * Dashboard API requests
+ */
+export interface GetAllTransactionsRequest {
+    // No fields needed - user ID is extracted from JWT token
+}
+
+export interface GetAllAccountsRequest {
+    // No fields needed - user ID is extracted from JWT token
+}
+
+export interface GetExpenseTransactionsRequest {
+    // No fields needed - user ID is extracted from JWT token
+}
+
+/**
+ * Dashboard API responses
+ */
+export interface GetExpenseTransactionsResponse {
+    success: boolean;
+    data: {
+        transactions: Transaction[];
+        totalCount: number;
+    };
+}

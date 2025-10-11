@@ -19,8 +19,6 @@ public class GetAllAccountsResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AccountDto {
-        private UUID id;
-        private UUID userId;
         private UUID plaidItemId;
         private String accountId;           // Plaid account ID
         private String name;
