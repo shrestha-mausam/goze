@@ -15,9 +15,7 @@ import {
     faCircleExclamation,
     faGear,
     faHome,
-    faList,
     faRightFromBracket,
-    faUser,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -155,18 +153,6 @@ const Sidebar: React.FC = () => {
                             primeIcon="pi pi-home"
                             faIcon={faHome}
                             tooltip="Home"
-                            onClick={() => router.push('/home')}
-                        />
-                        <IconButton
-                            primeIcon="pi pi-user"
-                            faIcon={faUser}
-                            tooltip="Profile"
-                            onClick={() => showComingSoon('Profile')}
-                        />
-                        <IconButton
-                            primeIcon="pi pi-list"
-                            faIcon={faList}
-                            tooltip="Transactions"
                             onClick={() => router.push('/home')}
                         />
                         <IconButton

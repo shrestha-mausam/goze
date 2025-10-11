@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
-import CategoryManagement from '@/components/CategoryManagement';
-import ChartOverview from '@/components/ChartOverview';
-import FinancialAccounts from '@/components/FinancialAccounts';
+import CategoryManagement from '@/components/home/CategoryManagement';
+import ChartOverview from '@/components/home/ChartOverview';
+import FinancialAccounts from '@/components/home/FinancialAccounts';
 import Sidebar from '@/components/Sidebar';
 import Topbar from '@/components/Topbar';
-import ExpenseTransactionsList from '@/components/ExpenseTransactionsList';
+import ExpenseTransactionsList from '@/components/home/ExpenseTransactionsList';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getAllTransactions, getAllAccounts, getExpenseTransactions } from '@/lib/api.client';
 import { Transaction, Account } from '@/lib/types';
