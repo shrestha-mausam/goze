@@ -2,6 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { PrimeReactProvider } from 'primereact/api';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { DataProvider } from '../contexts/DataContext';
 
 // Import PrimeReact theme CSS
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
@@ -23,7 +24,9 @@ export default function RootLayout({
         <html lang="en">
             <body>
                 <ThemeProvider>
-                    <PrimeReactProvider>{children}</PrimeReactProvider>
+                    <DataProvider>
+                        <PrimeReactProvider>{children}</PrimeReactProvider>
+                    </DataProvider>
                 </ThemeProvider>
             </body>
         </html>

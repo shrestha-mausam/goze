@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useData } from '@/contexts/DataContext';
 import AppLayout from '@/components/AppLayout';
 import Sidebar from '@/components/Sidebar';
 import Topbar from '@/components/Topbar';
-import { Transaction, Account } from '@/lib/types';
-import { getAllTransactions, getAllAccounts } from '@/lib/api.client';
 import { Toast } from 'primereact/toast';
 
 // Report components
@@ -17,15 +16,9 @@ import ReportSummary from '@/components/reports/ReportSummary';
 import TransactionsTable from '@/components/reports/TransactionsTable';
 import { ReportTab, DateRange, MonthRange, TabOption, DateRangeOption, MonthOption } from '@/components/reports/types';
 
-interface ReportsData {
-    transactions: Transaction[];
-    accounts: Account[];
-    loading: boolean;
-    error: string | null;
-}
-
 export default function Reports() {
     const { themeType } = useTheme();
+    const { allTransactions, accounts } = useData();
     const toast = useRef<Toast>(null);
     
     // State management
@@ -33,51 +26,6 @@ export default function Reports() {
     const [dateRange, setDateRange] = useState<DateRange>('thisMonth');
     const [comparisonRange1, setComparisonRange1] = useState<MonthRange>('thisMonth');
     const [comparisonRange2, setComparisonRange2] = useState<MonthRange>('lastMonth');
-    const [data, setData] = useState<ReportsData>({
-        transactions: [],
-        accounts: [],
-        loading: true,
-        error: null,
-    });
-
-    // Fetch data
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setData(prev => ({ ...prev, loading: true, error: null }));
-
-                const [transactionsResponse, accountsResponse] = await Promise.all([
-                    getAllTransactions(),
-                    getAllAccounts(),
-                ]);
-
-                if (!transactionsResponse.ok || !accountsResponse.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-
-                const [transactionsData, accountsData] = await Promise.all([
-                    transactionsResponse.json(),
-                    accountsResponse.json(),
-                ]);
-
-                setData({
-                    transactions: transactionsData.data?.transactions || [],
-                    accounts: accountsData.data?.accounts || [],
-                    loading: false,
-                    error: null,
-                });
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setData(prev => ({
-                    ...prev,
-                    loading: false,
-                    error: error instanceof Error ? error.message : 'Failed to load data',
-                }));
-            }
-        };
-
-        fetchData();
-    }, []);
 
     // Date range options
     const dateRangeOptions: DateRangeOption[] = [
@@ -183,8 +131,8 @@ export default function Reports() {
 
                 {/* Transaction Activities Card */}
                 <TransactionsTable
-                    transactions={data.transactions}
-                    accounts={data.accounts}
+                    transactions={allTransactions}
+                    accounts={accounts}
                     themeType={themeType}
                     toast={toast}
                 />

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
 import CategoryManagement from '@/components/home/CategoryManagement';
 import ChartOverview from '@/components/home/ChartOverview';
@@ -9,70 +8,11 @@ import Sidebar from '@/components/Sidebar';
 import Topbar from '@/components/Topbar';
 import ExpenseTransactionsList from '@/components/home/ExpenseTransactionsList';
 import { useTheme } from '@/contexts/ThemeContext';
-import { getAllTransactions, getAllAccounts, getExpenseTransactions } from '@/lib/api.client';
-import { Transaction, Account } from '@/lib/types';
-
-interface HomeData {
-    allTransactions: Transaction[];
-    expenseTransactions: Transaction[];
-    accounts: Account[];
-    loading: boolean;
-    error: string | null;
-}
+import { useData } from '@/contexts/DataContext';
 
 export default function Home() {
     const { themeType } = useTheme();
-    const [data, setData] = useState<HomeData>({
-        allTransactions: [],
-        expenseTransactions: [],
-        accounts: [],
-        loading: true,
-        error: null,
-    });
-
-    // Centralized data fetching
-    useEffect(() => {
-        const fetchAllData = async () => {
-            try {
-                setData(prev => ({ ...prev, loading: true, error: null }));
-
-                // Fetch all data in parallel
-                const [allTransactionsResponse, expenseTransactionsResponse, accountsResponse] = await Promise.all([
-                    getAllTransactions(),
-                    getExpenseTransactions(),
-                    getAllAccounts(),
-                ]);
-
-                // Check if all requests were successful
-                if (!allTransactionsResponse.ok || !expenseTransactionsResponse.ok || !accountsResponse.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-
-                const [allTransactionsData, expenseTransactionsData, accountsData] = await Promise.all([
-                    allTransactionsResponse.json(),
-                    expenseTransactionsResponse.json(),
-                    accountsResponse.json(),
-                ]);
-
-                setData({
-                    allTransactions: allTransactionsData.data?.transactions || [],
-                    expenseTransactions: expenseTransactionsData.data?.transactions || [],
-                    accounts: accountsData.data?.accounts || [],
-                    loading: false,
-                    error: null,
-                });
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setData(prev => ({
-                    ...prev,
-                    loading: false,
-                    error: error instanceof Error ? error.message : 'Failed to load data',
-                }));
-            }
-        };
-
-        fetchAllData();
-    }, []);
+    const { allTransactions, expenseTransactions, accounts, loading, error } = useData();
 
     return (
         <AppLayout title="Home | Goze">
@@ -92,9 +32,9 @@ export default function Home() {
                     >
                         <ChartOverview 
                             themeType={themeType} 
-                            transactions={data.allTransactions}
-                            loading={data.loading}
-                            error={data.error}
+                            transactions={allTransactions}
+                            loading={loading}
+                            error={error}
                         />
                     </div>
 
@@ -110,9 +50,9 @@ export default function Home() {
                                 }}
                             >
                                 <CategoryManagement 
-                                    transactions={data.expenseTransactions}
-                                    loading={data.loading}
-                                    error={data.error}
+                                    transactions={expenseTransactions}
+                                    loading={loading}
+                                    error={error}
                                 />
                             </div>
                         </div>
@@ -127,9 +67,9 @@ export default function Home() {
                                 }}
                             >
                                 <FinancialAccounts 
-                                    accounts={data.accounts}
-                                    loading={data.loading}
-                                    error={data.error}
+                                    accounts={accounts}
+                                    loading={loading}
+                                    error={error}
                                 />
                             </div>
                         </div>
@@ -146,9 +86,9 @@ export default function Home() {
                         }}
                     >
                         <ExpenseTransactionsList 
-                            transactions={data.expenseTransactions}
-                            loading={data.loading}
-                            error={data.error}
+                            transactions={expenseTransactions}
+                            loading={loading}
+                            error={error}
                         />
                     </div>
                 </div>
