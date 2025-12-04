@@ -2,6 +2,8 @@
 
 **Goze** is a comprehensive financial expense tracking application that helps you track, manage, and visualize your weekly expenses. It integrates with Plaid to securely connect to your financial institutions and automatically sync transactions.
 
+<img width="1252" height="791" alt="Screenshot 2025-12-03 at 19 12 08" src="https://github.com/user-attachments/assets/6cf2cdbb-2183-44ad-806d-bb2b7ebd581b" />
+
 ## Table of Contents
 
 - [Overview](#overview)
