@@ -315,6 +315,15 @@ a {
     font-weight: normal !important;
 }
 
+.dark-datatable .p-datatable-header {
+    background-color: transparent !important;
+    border-color: transparent !important;
+}
+
+.dark-datatable .p-datatable-header .p-datatable-header-content {
+    background-color: transparent !important;
+}
+
 .dark-datatable .p-datatable-tbody > tr {
     background-color: transparent !important;
     color: #9ca3af !important;

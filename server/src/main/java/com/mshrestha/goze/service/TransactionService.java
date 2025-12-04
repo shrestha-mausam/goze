@@ -32,7 +32,7 @@ public class TransactionService {
      * Process transaction sync response and update database
      */
     @Transactional
-    public void processTransactionSync(UUID userId, UUID accountId, TransactionSyncResponse syncResponse) {
+    public void processTransactionSync(UUID userId, String accountId, TransactionSyncResponse syncResponse) {
         try {
             logger.info("Processing transaction sync for user: {}, account: {}", userId, accountId);
             
@@ -62,7 +62,7 @@ public class TransactionService {
     /**
      * Process added transactions
      */
-    private void processAddedTransactions(UUID userId, UUID accountId, List<TransactionSyncResponse.Transaction> addedTransactions) {
+    private void processAddedTransactions(UUID userId, String accountId, List<TransactionSyncResponse.Transaction> addedTransactions) {
         logger.info("Processing {} added transactions for user: {}", addedTransactions.size(), userId);
         
         for (TransactionSyncResponse.Transaction plaidTransaction : addedTransactions) {
@@ -91,7 +91,7 @@ public class TransactionService {
     /**
      * Process modified transactions
      */
-    private void processModifiedTransactions(UUID userId, UUID accountId, List<TransactionSyncResponse.Transaction> modifiedTransactions) {
+    private void processModifiedTransactions(UUID userId, String accountId, List<TransactionSyncResponse.Transaction> modifiedTransactions) {
         logger.info("Processing {} modified transactions for user: {}", modifiedTransactions.size(), userId);
         
         for (TransactionSyncResponse.Transaction plaidTransaction : modifiedTransactions) {
@@ -141,7 +141,7 @@ public class TransactionService {
     /**
      * Create Transaction entity from Plaid transaction
      */
-    private Transaction createTransactionFromPlaid(UUID userId, UUID accountId, TransactionSyncResponse.Transaction plaidTransaction) {
+    private Transaction createTransactionFromPlaid(UUID userId, String accountId, TransactionSyncResponse.Transaction plaidTransaction) {
         Transaction transaction = new Transaction();
         transaction.setUserId(userId);
         transaction.setAccountId(accountId);

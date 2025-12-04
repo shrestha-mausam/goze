@@ -11,7 +11,7 @@ CREATE TABLE goze.users (
   last_name VARCHAR(100),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   last_login TIMESTAMP WITH TIME ZONE,
-  is_active BOOLEAN DEFAULT true,
+  is_active BOOLEAN DEFAULT true, -- is_active is used to determine if the user is active and can access the system   
   failed_login_attempts INTEGER DEFAULT 0,
   account_locked_until TIMESTAMP WITH TIME ZONE
 );
@@ -45,7 +45,7 @@ CREATE TABLE goze.accounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES goze.users(id) ON DELETE CASCADE,
   plaid_item_id UUID NOT NULL REFERENCES goze.plaid_items(id) ON DELETE CASCADE,
-  account_id VARCHAR(100) NOT NULL,
+  account_id VARCHAR(255) NOT NULL,
   name VARCHAR(100) NOT NULL,
   mask VARCHAR(10),
   official_name VARCHAR(200),
@@ -78,7 +78,7 @@ CREATE TABLE goze.accounts (
 CREATE TABLE goze.transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES goze.users(id) ON DELETE CASCADE,
-  account_id UUID NOT NULL REFERENCES goze.accounts(id) ON DELETE CASCADE,
+  account_id VARCHAR(100) NOT NULL REFERENCES goze.accounts(account_id) ON DELETE CASCADE,
   plaid_transaction_id VARCHAR(100),
   amount DECIMAL(19, 4) NOT NULL,
   date DATE NOT NULL,

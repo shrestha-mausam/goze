@@ -22,7 +22,7 @@ const ReportControls: React.FC<ReportControlsProps> = ({
                 {activeTab === 'comparison' ? (
                     <>
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-white">Period</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-400">Period</label>
                             <Dropdown
                                 value={comparisonRange1}
                                 options={monthOptions}
@@ -33,7 +33,7 @@ const ReportControls: React.FC<ReportControlsProps> = ({
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-white">Compare With</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-400">Compare With</label>
                             <Dropdown
                                 value={comparisonRange2}
                                 options={filteredMonthOptions}

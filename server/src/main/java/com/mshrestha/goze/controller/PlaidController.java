@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.mshrestha.goze.dto.api.ApiResponse;
 import com.mshrestha.goze.dto.plaid.*;
-import com.mshrestha.goze.model.PlaidItem;
 import com.mshrestha.goze.model.User;
 import com.mshrestha.goze.repository.UserRepository;
 import com.mshrestha.goze.service.PlaidService;
@@ -16,9 +15,6 @@ import com.mshrestha.goze.utils.GsonUtility;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/plaid")

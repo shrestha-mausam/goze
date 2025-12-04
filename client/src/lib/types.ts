@@ -203,6 +203,7 @@ export interface ErrRespDataToFrontend {
  */
 export interface Transaction {
     accountId: string;
+    accountName: string;  // NEW: Add this field
     plaidTransactionId: string;
     amount: number;
     date: string;

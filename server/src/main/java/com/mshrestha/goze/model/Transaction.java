@@ -24,7 +24,7 @@ public class Transaction {
     private UUID userId;
     
     @Column(name = "account_id", nullable = false)
-    private UUID accountId;
+    private String accountId;
     
     @Column(name = "plaid_transaction_id", unique = true)
     private String plaidTransactionId;
@@ -73,7 +73,7 @@ public class Transaction {
     // Constructors
     public Transaction() {}
     
-    public Transaction(UUID userId, UUID accountId, String plaidTransactionId, 
+    public Transaction(UUID userId, String accountId, String plaidTransactionId, 
                       BigDecimal amount, LocalDate date, String name) {
         this.userId = userId;
         this.accountId = accountId;
@@ -100,11 +100,11 @@ public class Transaction {
         this.userId = userId;
     }
     
-    public UUID getAccountId() {
+    public String getAccountId() {
         return accountId;
     }
     
-    public void setAccountId(UUID accountId) {
+    public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
     

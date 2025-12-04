@@ -7,6 +7,7 @@ import React, {
     useEffect,
     ReactNode,
 } from 'react';
+import { usePathname } from 'next/navigation';
 import { Transaction, Account } from '@/lib/types';
 import { getAllTransactions, getAllAccounts, getExpenseTransactions } from '@/lib/api.client';
 
@@ -24,14 +25,23 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider: React.FC<{ children: ReactNode }> = ({
     children,
 }) => {
+    const pathname = usePathname();
     const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
     const [expenseTransactions, setExpenseTransactions] = useState<Transaction[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Check if we're on a public route (login page)
+    const isPublicRoute = pathname === '/login' || pathname === '/';
 
     // Fetch all data in parallel
     const fetchData = async (): Promise<void> => {
+        // Don't fetch if on public routes
+        if (isPublicRoute) {
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -69,10 +79,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
         }
     };
 
-    // Fetch data on mount
+    // Fetch data on mount or when pathname changes (e.g., after login)
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [pathname]); // Re-fetch when route changes
 
     return (
         <DataContext.Provider

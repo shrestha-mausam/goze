@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -163,9 +163,20 @@ public class DashboardController {
             List<Transaction> transactions = transactionService.getTransactionsForUser(userId);
             logger.info("Found {} transactions for user: {}", transactions.size(), userId);
             
-            // Convert Transaction entities to DTOs
+            // NEW: Get all accounts for the user
+            List<Account> accounts = accountService.getAccountsForUser(userId);
+            
+            // NEW: Create account map for efficient lookup
+            Map<String, String> accountMap = accounts.stream()
+                .collect(Collectors.toMap(
+                    account -> account.getAccountId(),
+                    Account::getName,
+                    (existing, replacement) -> existing  // Handle duplicates
+                ));
+            
+            // Convert Transaction entities to DTOs with account names
             List<GetAllTransactionsResponse.TransactionDto> transactionDtos = transactions.stream()
-                .map(this::convertToDto)
+                .map(tx -> convertToDto(tx, accountMap))
                 .collect(Collectors.toList());
             
             // Create response
@@ -185,11 +196,21 @@ public class DashboardController {
     }
     
     /**
-     * Convert Transaction entity to TransactionDto
+     * Convert Transaction entity to TransactionDto with account name
      */
-    private GetAllTransactionsResponse.TransactionDto convertToDto(Transaction transaction) {
+    private GetAllTransactionsResponse.TransactionDto convertToDto(
+            Transaction transaction, 
+            Map<String, String> accountMap) {
+        
+        // Look up account name, default to "Unknown Account" if not found
+        String accountName = accountMap.getOrDefault(
+            transaction.getAccountId().toString(), 
+            "Unknown Account"
+        );
+        
         return new GetAllTransactionsResponse.TransactionDto(
             transaction.getAccountId(),
+            accountName,  // NEW: Add account name
             transaction.getPlaidTransactionId(),
             transaction.getAmount(),
             transaction.getDate() != null ? transaction.getDate().toString() : null,
@@ -242,9 +263,20 @@ public class DashboardController {
             List<Transaction> transactions = transactionService.getExpenseTransactionsForUser(userId);
             logger.info("Found {} expense transactions for user: {}", transactions.size(), userId);
 
-            // Convert Transaction entities to DTOs
+            // NEW: Get all accounts for the user
+            List<Account> accounts = accountService.getAccountsForUser(userId);
+            
+            // NEW: Create account map for efficient lookup
+            Map<String, String> accountMap = accounts.stream()
+                .collect(Collectors.toMap(
+                    account -> account.getAccountId(),
+                    Account::getName,
+                    (existing, replacement) -> existing
+                ));
+
+            // Convert Transaction entities to DTOs with account names
             List<GetExpenseTransactionsResponse.TransactionDto> transactionDtos = transactions.stream()
-                .map(this::convertExpenseTransactionToDto)
+                .map(tx -> convertExpenseTransactionToDto(tx, accountMap))
                 .collect(Collectors.toList());
 
             // Create response
@@ -264,11 +296,21 @@ public class DashboardController {
     }
 
     /**
-     * Convert Transaction entity to ExpenseTransactionDto
+     * Convert Transaction entity to ExpenseTransactionDto with account name
      */
-    private GetExpenseTransactionsResponse.TransactionDto convertExpenseTransactionToDto(Transaction transaction) {
+    private GetExpenseTransactionsResponse.TransactionDto convertExpenseTransactionToDto(
+            Transaction transaction,
+            Map<String, String> accountMap) {
+        
+        // Look up account name, default to "Unknown Account" if not found
+        String accountName = accountMap.getOrDefault(
+            transaction.getAccountId(),
+            "Unknown Account"
+        );
+        
         return new GetExpenseTransactionsResponse.TransactionDto(
             transaction.getAccountId(),
+            accountName,  // NEW: Add account name
             transaction.getPlaidTransactionId(),
             transaction.getAmount(),
             transaction.getDate() != null ? transaction.getDate().toString() : null,

@@ -40,7 +40,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     /**
      * Find transactions for a specific account
      */
-    List<Transaction> findByAccountIdOrderByDateDesc(UUID accountId);
+    List<Transaction> findByAccountIdOrderByDateDesc(String accountId);
     
     /**
      * Find pending transactions for a user

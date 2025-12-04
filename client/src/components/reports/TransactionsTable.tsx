@@ -18,13 +18,13 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
     toast
 }) => {
     // Transaction table state
-    const [selectedTransactions, setSelectedTransactions] = useState<any[]>([]);
     const [globalFilter, setGlobalFilter] = useState<string>('');
     
     // Filter state
     const [filterDateRange, setFilterDateRange] = useState<string>('all');
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [filterAmountRange, setFilterAmountRange] = useState<string>('all');
+
 
     // Filter options
     const filterDateOptions = [
@@ -73,6 +73,7 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
         const matchesGlobalFilter = !globalFilter || 
             transaction.name?.toLowerCase().includes(globalFilter.toLowerCase()) ||
             transaction.plaidCategory?.[0]?.toLowerCase().includes(globalFilter.toLowerCase()) ||
+            transaction.accountName?.toLowerCase().includes(globalFilter.toLowerCase()) ||
             transaction.accountId?.toLowerCase().includes(globalFilter.toLowerCase());
 
         const matchesDateFilter = (() => {
@@ -196,8 +197,6 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
 
             <DataTable
                 value={filteredTransactions}
-                selection={selectedTransactions}
-                onSelectionChange={(e) => setSelectedTransactions(e.value)}
                 dataKey="id"
                 paginator
                 rows={10}
@@ -205,21 +204,12 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
                 className={`datatable-responsive ${themeType === 'dark' ? 'dark-datatable' : ''}`}
                 globalFilter={globalFilter}
                 emptyMessage="No transactions found."
-                header={
-                    <div className="flex flex-wrap align-items-center justify-content-between gap-2">
-                        <span className="text-xl text-900 font-medium">Transactions</span>
-                    </div>
-                }
             >
-                <Column
-                    selectionMode="multiple"
-                    headerStyle={{ width: '3rem' }}
-                />
                 <Column
                     header="Account"
                     body={(rowData: any) => (
                         <span style={{ color: '#9ca3af' }}>
-                            {accounts.find(acc => acc.id === rowData.accountId)?.name || rowData.accountId}
+                            {rowData.accountName}
                         </span>
                     )}
                 />

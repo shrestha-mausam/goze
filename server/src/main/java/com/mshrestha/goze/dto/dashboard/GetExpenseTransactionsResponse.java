@@ -3,10 +3,8 @@ package com.mshrestha.goze.dto.dashboard;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Response DTO for getting expense transactions.
@@ -22,7 +20,8 @@ public class GetExpenseTransactionsResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class TransactionDto {
-        private UUID accountId;
+        private String accountId;
+        private String accountName;        // NEW: Add for display
         private String plaidTransactionId;
         private BigDecimal amount;
         private String date;              // LocalDate as string
